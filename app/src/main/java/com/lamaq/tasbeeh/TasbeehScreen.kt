@@ -25,8 +25,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.Refresh
-import com.lamaq.tasbeeh.ui.theme.ColorScheme
+import androidx.compose.material.icons.outlined.Settings
+import com.lamaq.tasbeeh.ui.theme.DarkColorScheme
 import com.lamaq.tasbeeh.ui.theme.LightColorScheme
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -35,6 +37,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -116,7 +119,7 @@ fun TasbeehScreen(
         // A surface container using the 'background' color from the theme
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = if (isSystemInDarkTheme()) ColorScheme.surface else LightColorScheme.surface,
+            color = if (isSystemInDarkTheme()) DarkColorScheme.surface else LightColorScheme.surface,
         ) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -182,6 +185,26 @@ fun TasbeehScreen(
                             modifier = Modifier.fillMaxSize(),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
+                            IconButton(
+                                onClick = { showMenu = true },
+                                modifier = Modifier.align(Alignment.End)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Settings,
+                                    contentDescription = "Settings",
+                                    tint = DarkColorScheme.onSecondaryContainer
+                                )
+                            }
+                            IconButton(
+                                onClick = { navController.popBackStack() },
+                                modifier = Modifier.align(Alignment.Start)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.KeyboardArrowLeft,
+                                    contentDescription = "Back",
+                                    tint = DarkColorScheme.onSecondaryContainer
+                                )
+                            }
                             Text(
                                 text = if (shortNames.contains(tasbeehName))
                                     tasbeehName
@@ -190,7 +213,6 @@ fun TasbeehScreen(
                                         "صلوات" -> {
                                             "أللهم صل على محمد و على أل محمد وبارك وسلم"
                                         }
-
                                         else -> {
                                             tasbeehName
                                         }
@@ -203,11 +225,11 @@ fun TasbeehScreen(
                                     Modifier.padding(top = 60.dp)
                                 else
                                     Modifier.padding(top = 40.dp),
-                                color = ColorScheme.tertiaryContainer,
+                                color = DarkColorScheme.tertiaryContainer,
                                 textAlign = TextAlign.Center,
                             )
                             val textSizeStyle = TextStyle(
-                                color = ColorScheme.onSecondaryContainer,
+                                color = DarkColorScheme.onSecondaryContainer,
                                 fontSize = 60.sp,
                                 lineHeight = 48.sp,
                                 textAlign = TextAlign.Center,
@@ -224,7 +246,7 @@ fun TasbeehScreen(
                                         .padding(top = 80.dp)
                                         .fillMaxWidth(1f)
                                 },
-                                color = ColorScheme.onSecondaryContainer,
+                                color = DarkColorScheme.onSecondaryContainer,
                                 style = textSizeStyle,
                                 maxLines = 1,
                             )
@@ -236,7 +258,7 @@ fun TasbeehScreen(
                                         "Unlimited"
                                 }",
                                 modifier = Modifier.padding(16.dp),
-                                color = ColorScheme.onSecondaryContainer,
+                                color = DarkColorScheme.onSecondaryContainer,
                                 style = MaterialTheme.typography.bodyMedium,
                                 maxLines = 1,
                             )
@@ -245,7 +267,7 @@ fun TasbeehScreen(
                                 text = "+1",
                                 modifier = Modifier.padding(top = 80.dp),
                                 style = MaterialTheme.typography.headlineMedium,
-                                color = if (isSystemInDarkTheme()) ColorScheme.secondaryContainer else LightColorScheme.secondaryContainer,
+                                color = if (isSystemInDarkTheme()) DarkColorScheme.secondaryContainer else LightColorScheme.secondaryContainer,
                                 fontSize = MaterialTheme.typography.headlineLarge.fontSize,
                                 fontWeight = MaterialTheme.typography.headlineLarge.fontWeight,
                             )
@@ -271,7 +293,7 @@ fun TasbeehScreen(
                                 modifier = Modifier
                                     .padding(10.dp)
                                     .background(
-                                        color = ColorScheme.secondaryContainer,
+                                        color = DarkColorScheme.secondaryContainer,
                                         shape = MaterialTheme.shapes.extraLarge
                                     )
                                     .size(50.dp)
@@ -279,7 +301,7 @@ fun TasbeehScreen(
                                 Icon(
                                     imageVector = ImageVector.vectorResource(id = R.drawable.neg1),
                                     contentDescription = "-1",
-                                    tint = ColorScheme.onSecondaryContainer,
+                                    tint = DarkColorScheme.onSecondaryContainer,
                                     modifier = Modifier.size(30.dp)
                                 )
                             }
@@ -290,7 +312,7 @@ fun TasbeehScreen(
                                 modifier = Modifier
                                     .padding(10.dp)
                                     .background(
-                                        color = ColorScheme.secondaryContainer,
+                                        color = DarkColorScheme.secondaryContainer,
                                         shape = MaterialTheme.shapes.extraLarge
                                     )
                                     .size(50.dp),
@@ -298,7 +320,7 @@ fun TasbeehScreen(
                                 Icon(
                                     imageVector = Icons.Outlined.Refresh,
                                     contentDescription = "Reset",
-                                    tint = ColorScheme.onSecondaryContainer,
+                                    tint = DarkColorScheme.onSecondaryContainer,
                                     modifier = Modifier
                                         .size(30.dp)
                                         .combinedClickable(
@@ -308,6 +330,7 @@ fun TasbeehScreen(
                                             onLongClick = {
                                                 limit = 0
                                                 limitReached = false
+                                                if (hasHaptics) vibrator.vibrate(vibrationEffect)
                                             }
                                         )
                                 )
@@ -319,7 +342,7 @@ fun TasbeehScreen(
                                 modifier = Modifier
                                     .padding(10.dp)
                                     .background(
-                                        color = ColorScheme.secondaryContainer,
+                                        color = DarkColorScheme.secondaryContainer,
                                         shape = MaterialTheme.shapes.extraLarge
                                     )
                                     .size(50.dp)
@@ -327,7 +350,7 @@ fun TasbeehScreen(
                                 Icon(
                                     imageVector = Icons.Outlined.Edit,
                                     contentDescription = "Edit",
-                                    tint = ColorScheme.onSecondaryContainer,
+                                    tint = DarkColorScheme.onSecondaryContainer,
                                     modifier = Modifier.size(30.dp)
                                 )
                             }
@@ -338,7 +361,7 @@ fun TasbeehScreen(
                                 modifier = Modifier
                                     .padding(10.dp)
                                     .background(
-                                        color = ColorScheme.secondaryContainer,
+                                        color = DarkColorScheme.secondaryContainer,
                                         shape = MaterialTheme.shapes.extraLarge
                                     )
                                     .size(50.dp)
@@ -346,12 +369,61 @@ fun TasbeehScreen(
                                 Icon(
                                     imageVector = ImageVector.vectorResource(id = R.drawable.limit),
                                     contentDescription = "Limit",
-                                    tint = ColorScheme.onSecondaryContainer,
+                                    tint = DarkColorScheme.onSecondaryContainer,
                                     modifier = Modifier.size(30.dp)
                                 )
                             }
                         }
                     }
+                }
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd) // Align the menu to the top right corner
+                ) {
+                    // Add content inside the DropdownMenu, e.g., DropdownMenuItems
+                    DropdownMenuItem(
+                        text = {
+                            Row {
+                                Text(text = "Sound")
+                                Switch(
+                                    checked = hasSound,
+                                    onCheckedChange = {
+                                        hasSound = it
+                                        with (settingsPref.edit()) {
+                                            putBoolean("hasSound", hasSound)
+                                            apply()
+                                        } },
+                                    modifier = Modifier.padding(start = 10.dp)
+                                )
+                            }
+                        },
+                        onClick = {
+                            showMenu = false
+                        },
+                    )
+
+                    DropdownMenuItem(
+                        text = {
+                            Row {
+                                Text(text = "Haptics")
+                                Switch(
+                                    checked = hasHaptics,
+                                    onCheckedChange = {
+                                        hasHaptics = it
+                                        with (settingsPref.edit()) {
+                                            putBoolean("hasHaptics", hasHaptics)
+                                            apply()
+                                        } },
+                                    modifier = Modifier.padding(start = 10.dp)
+                                )
+                            }
+                        },
+                        onClick = {
+                            showMenu = false
+                        },
+                    )
                 }
             }
         }
