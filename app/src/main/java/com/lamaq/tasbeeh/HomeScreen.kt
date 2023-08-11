@@ -1,5 +1,7 @@
 package com.lamaq.tasbeeh
 
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -23,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -38,6 +41,10 @@ fun HomeScreen(
     navController: NavController
 )
 {
+    val sharedPref: SharedPreferences? = LocalContext.current.getSharedPreferences(
+        "tasbeehs",
+        Context.MODE_PRIVATE
+    )
     val hasHaptics by remember { mutableStateOf(true) }
     val haptic = LocalHapticFeedback.current
     var showMenu by remember { mutableStateOf(false) }
@@ -48,7 +55,7 @@ fun HomeScreen(
         ) {
             Box(
                 modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.TopCenter // Align content to the top right corner
+                contentAlignment = Alignment.TopCenter
             ) {
                 Column(
                     modifier = Modifier.fillMaxSize(),

@@ -13,7 +13,7 @@ fun SetupNav(
     tasbeehData: Map<String, Int>,
     navController: NavHostController
 ) {
-    NavHost(navController = navController, startDestination = "tasbeeh/ya Hussain/"+786) {
+    NavHost(navController = navController, startDestination = "home") {
         composable("home") {
             HomeScreen(
                 tasbeehData = tasbeehData,

@@ -39,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -58,14 +59,13 @@ import androidx.navigation.NavController
 import com.lamaq.tasbeeh.components.shortNames
 import com.lamaq.tasbeeh.ui.theme.TasbeehTheme
 
-var sharedPref: SharedPreferences? = null
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun TasbeehScreen(
     tasbeehName: String,
     navController: NavController,
 ){
-    sharedPref = LocalContext.current.getSharedPreferences(
+    val sharedPref: SharedPreferences? = LocalContext.current.getSharedPreferences(
         "tasbeehs",
         Context.MODE_PRIVATE
     )
@@ -75,8 +75,8 @@ fun TasbeehScreen(
     )
 
     var showMenu by remember { mutableStateOf(false) }
-    var total_counter by remember { mutableStateOf(0) }
-    var counter by remember { mutableStateOf(0) }
+    var total_counter by remember { mutableIntStateOf(0) }
+    var counter by remember { mutableIntStateOf(0) }
     total_counter = sharedPref?.getInt(tasbeehName, 0)!!
 
     var hasHaptics by remember { mutableStateOf(true) }
@@ -89,7 +89,7 @@ fun TasbeehScreen(
 
     val default_limit = 2000000000
 
-    var limit by remember { mutableStateOf(0) }
+    var limit by remember { mutableIntStateOf(0) }
     var limitReached by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
@@ -137,7 +137,7 @@ fun TasbeehScreen(
                                         if (limit > 0) {
                                             if (counter < limit && !limitReached) {
                                                 counter++
-                                                with (sharedPref!!.edit()) {
+                                                with (sharedPref.edit()) {
                                                     putInt(tasbeehName, total_counter + counter)
                                                     apply()
                                                 }
@@ -153,7 +153,7 @@ fun TasbeehScreen(
                                         } else {
                                             if (counter < default_limit && !limitReached) {
                                                 counter++
-                                                with (sharedPref!!.edit()) {
+                                                with (sharedPref.edit()) {
                                                     putInt(tasbeehName, total_counter + counter)
                                                     apply()
                                                 }
@@ -262,7 +262,7 @@ fun TasbeehScreen(
                                         counter = 0
                                     } else {
                                         counter--
-                                        with (sharedPref!!.edit()) {
+                                        with (sharedPref.edit()) {
                                             putInt(tasbeehName, total_counter + counter)
                                             apply()
                                         }
@@ -353,8 +353,6 @@ fun TasbeehScreen(
                         }
                     }
                 }
-
-
             }
         }
     }
