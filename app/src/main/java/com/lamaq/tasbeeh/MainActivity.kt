@@ -12,7 +12,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
 
-            SetupNav(tasbeehData = tasbeehData, navController = navController)
+            SetupNav(
+                tasbeehData = tasbeehData,
+                navController = navController
+            )
         }
     }
 }

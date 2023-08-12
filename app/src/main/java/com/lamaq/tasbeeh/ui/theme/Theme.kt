@@ -23,6 +23,9 @@ val DarkColorScheme = darkColorScheme(
     secondary = Color(0xFF945D3D),
     tertiary = Color(0xFFDB1A34),
     onTertiary = Color.White,
+    primaryContainer = Color(0xFFFCD697), //for +1 button box
+    onPrimaryContainer = Color(0x81945D3D), //for +1 button text
+    inversePrimary = Color(0xFFBE7348), //for textField label
 )
 
 val LightColorScheme = lightColorScheme(

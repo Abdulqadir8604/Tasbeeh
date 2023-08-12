@@ -10,7 +10,7 @@ import androidx.navigation.navArgument
 
 @Composable
 fun SetupNav(
-    tasbeehData: Map<String, Int>,
+    tasbeehData: Set<String>,
     navController: NavHostController
 ) {
     NavHost(navController = navController, startDestination = "home") {
