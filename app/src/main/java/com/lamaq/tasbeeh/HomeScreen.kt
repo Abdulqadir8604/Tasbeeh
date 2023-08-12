@@ -1,5 +1,6 @@
 package com.lamaq.tasbeeh
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.foundation.Image
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -47,6 +49,7 @@ import com.lamaq.tasbeeh.ui.theme.DarkColorScheme
 import com.lamaq.tasbeeh.ui.theme.LightColorScheme
 import com.lamaq.tasbeeh.ui.theme.TasbeehTheme
 
+@SuppressLint("UnnecessaryComposedModifier")
 @Composable
 fun HomeScreen(
     tasbeehData: Map<String, Int>,
@@ -67,7 +70,7 @@ fun HomeScreen(
     TasbeehTheme {
         Surface(
             color = if (isSystemInDarkTheme()) DarkColorScheme.surface else LightColorScheme.surface,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -77,60 +80,56 @@ fun HomeScreen(
                     modifier = Modifier
                         .padding(50.dp)
                         .align(Alignment.TopEnd)
-                        .wrapContentSize()
-                        .background(
-                            if (isSystemInDarkTheme()) DarkColorScheme.primary else LightColorScheme.primary,
-                            shape = MaterialTheme.shapes.large
-                        ),
-                    content = {
-                        DropdownMenu(
-                            expanded = showMenu,
-                            onDismissRequest = { showMenu = false },
-                            modifier = Modifier
-                                .background(
-                                    if (isSystemInDarkTheme()) DarkColorScheme.primary else LightColorScheme.primary,
-                                    shape = MaterialTheme.shapes.large
-                                )
-                        ) {
-                            DropdownMenuItem(
-                                text = {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.padding(10.dp)
-                                    ) {
-                                        Text(
-                                            text = "Haptics",
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            modifier = Modifier.padding(end = 10.dp),
-                                            color = Color.DarkGray
-                                        )
-                                        Switch(
-                                            checked = hasHaptics,
-                                            onCheckedChange = {
-                                                hasHaptics = it
-                                                with(settingsPref.edit()) {
-                                                    putBoolean("hasHaptics", hasHaptics)
-                                                    apply()
-                                                }
-                                            },
-                                            modifier = Modifier.padding(start = 10.dp),
-                                            colors = SwitchDefaults.colors(
-                                                checkedThumbColor = DarkColorScheme.primary,
-                                                uncheckedThumbColor = DarkColorScheme.secondary,
-                                                uncheckedTrackColor = DarkColorScheme.primary,
-                                                checkedTrackColor = DarkColorScheme.secondary
-                                            ),
-
-                                            )
-                                    }
-                                },
-                                onClick = {
-                                    showMenu = false
-                                },
+                ) {
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false },
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .background(
+                                if (isSystemInDarkTheme()) DarkColorScheme.primary else LightColorScheme.primary,
                             )
-                        }
+                    ) {
+                        DropdownMenuItem(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentSize(Alignment.CenterStart),
+                            onClick = {
+                                hasHaptics = !hasHaptics
+                            },
+
+                            text = {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text(
+                                        text = "Haptics",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        modifier = Modifier.padding(end = 10.dp),
+                                        color = Color.DarkGray
+                                    )
+                                    Switch(
+                                        checked = hasHaptics,
+                                        onCheckedChange = {
+                                            hasHaptics = it
+                                            with(settingsPref.edit()) {
+                                                putBoolean("hasHaptics", hasHaptics)
+                                                apply()
+                                            }
+                                        },
+                                        modifier = Modifier.padding(start = 10.dp).height(20.dp),
+                                        colors = SwitchDefaults.colors(
+                                            checkedThumbColor = DarkColorScheme.primary,
+                                            uncheckedThumbColor = DarkColorScheme.secondary,
+                                            uncheckedTrackColor = DarkColorScheme.primary,
+                                            checkedTrackColor = DarkColorScheme.secondary
+                                        ),
+                                    )
+                                }
+                            },
+                        )
                     }
-                )
+                }
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -166,18 +165,18 @@ fun HomeScreen(
                     Text(
                         text = "latest updates will be shown here",
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
                     )
                     LazyRow(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(top = 4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
                         state = rememberLazyListState(),
                     ) {
                         items(tasbeehData.size) { index ->
                             TasbeehCards(
-                                tasbeehData.entries.elementAt(index)
+                                tasbeehData.entries.elementAt(index),
                             ) { _, _ ->
                                 if (hasHaptics) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 val tasbeeh = tasbeehData.entries.elementAt(index)
