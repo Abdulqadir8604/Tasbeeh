@@ -1,22 +1,32 @@
 package com.lamaq.tasbeeh
 
-import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-
+import com.lamaq.tasbeeh.components.homeTasbeeh
+import com.lamaq.tasbeeh.components.tasbeehTypes
 @Composable
 fun SetupNav(
-    tasbeehData: Set<String>,
-    navController: NavHostController
+    navController: NavHostController,
 ) {
-    NavHost(navController = navController, startDestination = "home") {
-        composable("home") {
+
+    NavHost(navController = navController, startDestination = "home/${homeTasbeeh.elementAt(0)}}") {
+        composable(
+            "home/{tasbeehData}",
+            arguments = listOf(
+                navArgument("tasbeehData") { type = NavType.StringType },
+            )
+        ) { backStackEntry ->
             HomeScreen(
-                tasbeehData = tasbeehData,
+                tasbeehData =
+                    if (backStackEntry.arguments?.getString("tasbeehData") in tasbeehTypes)
+                        backStackEntry.arguments?.getString("tasbeehData") ?: ""
+                    else
+                        homeTasbeeh.elementAt(0)
+                ,
                 navController = navController,
             )
         }

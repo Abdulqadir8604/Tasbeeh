@@ -3,19 +3,18 @@ package com.lamaq.tasbeeh
 import android.content.Context
 import android.content.Context.VIBRATOR_SERVICE
 import android.content.SharedPreferences
-import android.graphics.Paint.Align
 import android.media.AudioAttributes
 import android.media.SoundPool
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -23,7 +22,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,14 +44,10 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -66,10 +60,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -86,9 +80,7 @@ import androidx.navigation.NavController
 import com.lamaq.tasbeeh.components.longTasbeehs
 import com.lamaq.tasbeeh.components.shortNames
 import com.lamaq.tasbeeh.ui.theme.DarkColorScheme
-import com.lamaq.tasbeeh.ui.theme.LightColorScheme
 import com.lamaq.tasbeeh.ui.theme.TasbeehTheme
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -109,9 +101,10 @@ fun TasbeehScreen(
     )
 
     var showMenu by remember { mutableStateOf(false) }
-    var total_counter by remember { mutableIntStateOf(0) }
+    var totalCounter by remember { mutableIntStateOf(0) }
+    totalCounter = sharedPref?.getInt(tasbeehName, 0)!!
+    
     var counter by remember { mutableIntStateOf(0) }
-    total_counter = sharedPref?.getInt(tasbeehName, 0)!!
 
     var hasHaptics by remember { mutableStateOf(true) }
     hasHaptics = settingsPref.getBoolean("hasHaptics", true)
@@ -210,7 +203,7 @@ fun TasbeehScreen(
                                 }
                             },
                             onClick = {
-                                showMenu = false
+                                hasSound = !hasSound
                             },
                         )
 
@@ -249,7 +242,7 @@ fun TasbeehScreen(
                                 }
                             },
                             onClick = {
-                                showMenu = false
+                                hasHaptics = !hasHaptics
                             },
                         )
                     }
@@ -261,93 +254,6 @@ fun TasbeehScreen(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // top bar
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    )
-                    {
-                        IconButton(
-                            onClick = { navController.popBackStack() },
-                            modifier = Modifier
-                                .padding(start = 20.dp, top = 20.dp)
-                                .align(Alignment.TopStart)
-                                .background(
-                                    DarkColorScheme.secondary,
-                                    shape = MaterialTheme.shapes.extraLarge
-                                )
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.KeyboardArrowLeft,
-                                contentDescription = "Back",
-                                tint = DarkColorScheme.primary,
-                            )
-                        }
-                        IconButton(
-                            onClick = { showMenu = true },
-                            modifier = Modifier
-                                .padding(end = 20.dp, top = 20.dp)
-                                .align(Alignment.TopEnd)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Settings,
-                                modifier = Modifier.size(30.dp),
-                                contentDescription = "Settings",
-                                tint = DarkColorScheme.secondary,
-                            )
-                        }
-                    }
-                    // text and counter
-                    Text(
-                        text = if (tasbeehName in longTasbeehs)
-                            longTasbeehs.filter { it.key == tasbeehName }.values.first()
-                        else
-                            tasbeehName,
-                        style = if (!shortNames.contains(tasbeehName))
-                            MaterialTheme.typography.headlineSmall
-                        else
-                            MaterialTheme.typography.headlineLarge,
-                        modifier = if (!shortNames.contains(tasbeehName))
-                            Modifier.padding(top = 60.dp)
-                        else
-                            Modifier.padding(top = 40.dp),
-                        color = DarkColorScheme.secondary,
-                        textAlign = TextAlign.Center,
-                    )
-                    val textSizeStyle = TextStyle(
-                        color = DarkColorScheme.secondary,
-                        fontSize = 60.sp,
-                        lineHeight = 48.sp,
-                        textAlign = TextAlign.Center,
-
-                        )
-                    Text(
-                        text = counter.toString(),
-                        modifier = if (!shortNames.contains(tasbeehName)) {
-                            Modifier
-                                .padding(top = 40.dp)
-                                .fillMaxWidth(1f)
-                        } else {
-                            Modifier
-                                .padding(top = 80.dp)
-                                .fillMaxWidth(1f)
-                        },
-                        color = DarkColorScheme.secondary,
-                        style = textSizeStyle,
-                        maxLines = 1,
-                    )
-                    Text(
-                        text = "Limit: ${
-                            if (limit > 0)
-                                limit.toString()
-                            else
-                                "Unlimited"
-                        }",
-                        modifier = Modifier.padding(16.dp),
-                        color = DarkColorScheme.tertiary,
-                        style = MaterialTheme.typography.bodyMedium,
-                        maxLines = 1,
-                    )
                     AnimatedVisibility(
                         visible = visible,
                         enter = fadeIn(
@@ -355,10 +261,162 @@ fun TasbeehScreen(
                                 durationMillis = 250,
                                 easing = LinearEasing
                             )
-                        ) + slideInVertically (
+                        ),
+                        exit = fadeOut(
+                            animationSpec = tween(
+                                durationMillis = 250,
+                                easing = LinearEasing
+                            )
+                        )
+                    ) {
+                        // top bar
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        )
+                        {
+                            IconButton(
+                                onClick = {
+                                    visible = false
+                                    navController.popBackStack()
+                                },
+                                modifier = Modifier
+                                    .padding(start = 20.dp, top = 20.dp)
+                                    .align(Alignment.TopStart)
+                                    .background(
+                                        DarkColorScheme.secondary,
+                                        shape = MaterialTheme.shapes.extraLarge
+                                    )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.KeyboardArrowLeft,
+                                    contentDescription = "Back",
+                                    tint = DarkColorScheme.primary,
+                                )
+                            }
+                            IconButton(
+                                onClick = { showMenu = true },
+                                modifier = Modifier
+                                    .padding(end = 20.dp, top = 20.dp)
+                                    .align(Alignment.TopEnd)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Settings,
+                                    modifier = Modifier.size(30.dp),
+                                    contentDescription = "Settings",
+                                    tint = DarkColorScheme.secondary,
+                                )
+                            }
+                        }
+                    }
+                    // text and counter
+                    AnimatedVisibility(
+                        visible = visible,
+                        enter = fadeIn(
+                            animationSpec = tween(
+                                durationMillis = 250,
+                                easing = LinearEasing
+                            )
+                        ) + slideInVertically(
+                            initialOffsetY = { -400 },
+                            animationSpec = tween(
+                                durationMillis = 500,
+                                easing = FastOutSlowInEasing
+                            )
+                        ),
+                        exit = fadeOut(
+                            animationSpec = tween(
+                                durationMillis = 250,
+                                easing = LinearEasing
+                            )
+                        ) + slideOutVertically(
+                            targetOffsetY = { -400 },
+                            animationSpec = tween(
+                                durationMillis = 500,
+                                easing = FastOutSlowInEasing
+                            )
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier.wrapContentSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = if (tasbeehName in longTasbeehs)
+                                    longTasbeehs.filter { it.key == tasbeehName }.values.first()
+                                else
+                                    tasbeehName,
+                                style = if (!shortNames.contains(tasbeehName))
+                                    MaterialTheme.typography.headlineSmall
+                                else
+                                    MaterialTheme.typography.headlineLarge,
+                                modifier = if (!shortNames.contains(tasbeehName))
+                                    Modifier.padding(top = 60.dp)
+                                else
+                                    Modifier.padding(top = 30.dp),
+                                color = DarkColorScheme.secondary,
+                                textAlign = TextAlign.Center,
+                            )
+                            val textSizeStyle = TextStyle(
+                                color = DarkColorScheme.secondary,
+                                fontSize = 60.sp,
+                                lineHeight = 48.sp,
+                                textAlign = TextAlign.Center,
+
+                                )
+                            Text(
+                                text = counter.toString(),
+                                modifier = if (shortNames.contains(tasbeehName)) {
+                                    Modifier
+                                        .padding(top = 40.dp, bottom = 8.dp)
+                                        .fillMaxWidth(1f)
+                                } else {
+                                    Modifier
+                                        .padding(top = 50.dp, bottom = 8.dp)
+                                        .fillMaxWidth(1f)
+                                },
+                                color = DarkColorScheme.secondary,
+                                style = textSizeStyle,
+                                maxLines = 1,
+                            )
+                            Text(
+                                text = "+",
+                                color = DarkColorScheme.secondary,
+                                style = MaterialTheme.typography.bodyLarge,
+                                maxLines = 1,
+                            )
+                            Text(
+                                text = "$totalCounter",
+                                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+                                color = DarkColorScheme.secondary,
+                                style = MaterialTheme.typography.bodyLarge,
+                                maxLines = 1,
+                            )
+                            Text(
+                                text = "Limit: ${
+                                    if (limit > 0)
+                                        limit.toString()
+                                    else
+                                        "Unlimited"
+                                }",
+                                modifier = Modifier.padding(top = 16.dp, bottom = 10.dp),
+                                color = DarkColorScheme.tertiary,
+                                style = MaterialTheme.typography.bodyMedium,
+                                maxLines = 1,
+                            )
+                        }
+                    }
+                    AnimatedVisibility(
+                        visible = visible,
+                        enter = fadeIn(
+                            animationSpec = tween(
+                                durationMillis = 250,
+                                easing = LinearEasing
+                            )
+                        ) + slideInVertically(
                             initialOffsetY = { 400 },
                             animationSpec = tween(
-                                durationMillis = 1000,
+                                durationMillis = 500,
                                 easing = FastOutSlowInEasing
                             )
                         ),
@@ -370,7 +428,7 @@ fun TasbeehScreen(
                         ) + slideOutVertically(
                             targetOffsetY = { 400 },
                             animationSpec = tween(
-                                durationMillis = 1000,
+                                durationMillis = 500,
                                 easing = FastOutSlowInEasing
                             )
                         )
@@ -394,7 +452,7 @@ fun TasbeehScreen(
                                                     with(sharedPref.edit()) {
                                                         putInt(
                                                             tasbeehName,
-                                                            total_counter + counter
+                                                            totalCounter + counter
                                                         )
                                                         apply()
                                                     }
@@ -414,7 +472,7 @@ fun TasbeehScreen(
                                                     with(sharedPref.edit()) {
                                                         putInt(
                                                             tasbeehName,
-                                                            total_counter + counter
+                                                            totalCounter + counter
                                                         )
                                                         apply()
                                                     }
@@ -444,10 +502,10 @@ fun TasbeehScreen(
                                 modifier = Modifier.fillMaxSize(),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Spacer(modifier = Modifier.padding(30.dp))
+                                Spacer(modifier = Modifier.padding(20.dp))
                                 Text(
                                     text = "+1",
-                                    modifier = Modifier.padding(top = 80.dp),
+                                    modifier = Modifier.padding(top = 60.dp),
                                     style = MaterialTheme.typography.headlineMedium,
                                     color = DarkColorScheme.onPrimaryContainer,
                                     fontSize = MaterialTheme.typography.headlineLarge.fontSize,
@@ -467,7 +525,7 @@ fun TasbeehScreen(
                                         } else {
                                             counter--
                                             with(sharedPref.edit()) {
-                                                putInt(tasbeehName, total_counter--)
+                                                putInt(tasbeehName, totalCounter + counter)
                                                 apply()
                                             }
                                         }
@@ -554,7 +612,9 @@ fun TasbeehScreen(
                                         imageVector = ImageVector.vectorResource(id = R.drawable.limit),
                                         contentDescription = "Limit",
                                         tint = DarkColorScheme.primary,
-                                        modifier = Modifier.size(30.dp)
+                                        modifier = Modifier
+                                            .size(30.dp)
+                                            .rotate(-90f)
                                     )
                                 }
                             }
@@ -591,7 +651,7 @@ fun TasbeehScreen(
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(top = 90.dp),
+                                    .padding(top = 80.dp),
                                 keyboardOptions = KeyboardOptions(
                                     keyboardType = KeyboardType.Number,
                                     imeAction = ImeAction.Done,
@@ -689,7 +749,7 @@ fun TasbeehScreen(
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(top = 90.dp),
+                                    .padding(top = 80.dp),
                                 keyboardOptions = KeyboardOptions(
                                     keyboardType = KeyboardType.Number,
                                     imeAction = ImeAction.Done,
@@ -767,6 +827,10 @@ fun TasbeehScreen(
         onDispose {
             soundPool.release()
         }
+    }
+    BackHandler {
+        visible = false
+        navController.popBackStack()
     }
 }
 

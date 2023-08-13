@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.TasbeehSplash" parent="Theme.SplashScreen.IconBackground">
+
+    <style name="Theme.TasbeehSplash" parent="Theme.SplashScreen">
 
         <item name="windowSplashScreenBackground">@color/background</item>
         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
-        <item name="windowSplashScreenAnimationDuration">1000</item>
+        <item name="windowSplashScreenAnimationDuration">500</item>
         <item name="postSplashScreenTheme">@style/Theme.Tasbeeh</item>
+
+        <item name="android:windowSplashScreenBrandingImage">@drawable/branding</item>
 
     </style>
     <style name="Theme.Tasbeeh" parent="android:Theme.Material.Light.NoActionBar" />

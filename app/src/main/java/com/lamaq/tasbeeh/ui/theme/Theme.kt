@@ -3,6 +3,8 @@ package com.lamaq.tasbeeh.ui.theme
 import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.ripple.RippleAlpha
+import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -19,11 +21,11 @@ import androidx.core.view.WindowCompat
 val DarkColorScheme = darkColorScheme(
     surface = Color(0xFFFDEAC9),
     background = Color(0xFFFDEAC9),
-    primary = Color(0xFFF0C984),
+    primary = Color(0xFFFCD697),
     secondary = Color(0xFF945D3D),
     tertiary = Color(0xFFDB1A34),
     onTertiary = Color.White,
-    primaryContainer = Color(0xFFFCD697), //for +1 button box
+    primaryContainer = Color(0xA6FCD697), //for +1 button box
     onPrimaryContainer = Color(0x81945D3D), //for +1 button text
     inversePrimary = Color(0xFFBE7348), //for textField label
 )
@@ -76,4 +78,17 @@ fun TasbeehTheme(
         typography = Typography,
         content = content,
     )
+}
+
+object TasbeehRippleTheme: RippleTheme {
+    @Composable
+    override fun defaultColor(): Color {
+        return Color(0xFF945D3D)
+    }
+
+    @Composable
+    override fun rippleAlpha(): RippleAlpha {
+        return RippleAlpha(0.2f, 0.14f, 0.12f, 0.3f)
+    }
+
 }
