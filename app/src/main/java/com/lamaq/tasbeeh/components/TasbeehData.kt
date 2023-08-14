@@ -47,3 +47,7 @@ val shortNames: Set<String> = setOf(
 val longTasbeehs: Map<String, String> = mapOf(
     "صلوات" to "أللهم صل على محمد و على أل محمد وبارك وسلم",
 )
+
+val hasSub = setOf(
+    "أهل البيت" to ahlebait,
+)

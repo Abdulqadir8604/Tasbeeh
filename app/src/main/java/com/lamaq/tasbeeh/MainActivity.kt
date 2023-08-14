@@ -15,6 +15,12 @@ class MainActivity : ComponentActivity() {
             StartApp()
         }
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        val drawerPref = getSharedPreferences("drawer", MODE_PRIVATE)
+        drawerPref.edit().clear().apply()
+    }
 }
 
 @Composable

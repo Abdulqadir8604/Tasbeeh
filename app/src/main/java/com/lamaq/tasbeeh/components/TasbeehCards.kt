@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -75,14 +74,15 @@ fun TasbeehCards(
     Card(
         modifier = Modifier
             .padding(16.dp)
-            .widthIn(min = 200.dp, max = 300.dp)
+            .widthIn(min = 200.dp, max = 350.dp)
             .heightIn(min = 20.dp, max = 300.dp)
             .background(
                 color = DarkColorScheme.primary,
-                shape = MaterialTheme.shapes.medium
-            ),
+                shape = MaterialTheme.shapes.large
+            )
+                ,
         elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = 8.dp,
+            defaultElevation = 0.dp,
         ),
         colors = CardDefaults.cardColors(
             containerColor = DarkColorScheme.primary,
@@ -97,49 +97,6 @@ fun TasbeehCards(
         ) {
 
             if (tasbeehData.matches(
-                    Regex(
-                        singleTasbeeh.joinToString(
-                            separator = "|",
-                            prefix = "(",
-                            postfix = ")"
-                        )
-                    )
-                ) || tasbeehData.matches(
-                    Regex(
-                        homeTasbeeh.joinToString(
-                            separator = "|",
-                            prefix = "(",
-                            postfix = ")"
-                        )
-                    )
-                )
-            ) {
-                Text(
-                    text = tasbeehData,
-                    style = Typography.headlineLarge,
-                    modifier = Modifier
-                        .padding(8.dp),
-                    textAlign = TextAlign.Center,
-                    color = DarkColorScheme.secondary
-                )
-                Box(
-                    modifier = Modifier.combinedClickable(
-                        onClick = {},
-                        onLongClick = {
-                            showEditDialog = true
-                        }
-                    )
-                ) {
-                    Text(
-                        text = totalCount,
-                        style = MaterialTheme.typography.headlineMedium,
-                        modifier = Modifier
-                            .padding(16.dp),
-                        textAlign = TextAlign.Center,
-                        color = DarkColorScheme.secondary,
-                    )
-                }
-            } else if (tasbeehData.matches(
                     Regex(
                         ahlebait.joinToString(
                             separator = "|",
@@ -190,6 +147,7 @@ fun TasbeehCards(
                         )
                     }
                 }
+                Spacer(modifier = Modifier.height(8.dp))
             } else {
                 Text(
                     text = tasbeehData,
@@ -199,6 +157,7 @@ fun TasbeehCards(
                     textAlign = TextAlign.Start,
                     color = DarkColorScheme.secondary
                 )
+                Spacer(modifier = Modifier.height(8.dp))
                 Box(
                     modifier = Modifier.combinedClickable(
                         onClick = {},
@@ -214,10 +173,11 @@ fun TasbeehCards(
                             .padding(16.dp),
                         textAlign = TextAlign.End,
                         color = DarkColorScheme.secondary,
+                        fontSize = MaterialTheme.typography.headlineLarge.fontSize,
                     )
                 }
+                Spacer(modifier = Modifier.height(20.dp))
             }
-            Spacer(modifier = Modifier.height(8.dp))
             ElevatedButton(
                 onClick = {
                     onItemClick(
@@ -265,7 +225,7 @@ fun TasbeehCards(
                     },
                     label = {
                         Text(
-                            "Enter Total Count",
+                            "Edit Total Count",
                             style = MaterialTheme.typography.bodyLarge,
                             color = DarkColorScheme.inversePrimary
                         )

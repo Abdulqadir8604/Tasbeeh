@@ -3,7 +3,7 @@
     <style name="Theme.TasbeehSplash" parent="Theme.SplashScreen.IconBackground">
 
         <item name="windowSplashScreenBackground">@color/background</item>
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher</item>
         <item name="windowSplashScreenAnimationDuration">1000</item>
         <item name="postSplashScreenTheme">@style/Theme.Tasbeeh</item>
 
