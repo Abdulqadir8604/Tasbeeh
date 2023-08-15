@@ -77,6 +77,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -616,6 +617,7 @@ fun TasbeehScreen(
                                                 .combinedClickable(
                                                     onClick = {
                                                         counter = 0
+                                                        limitReached = false
                                                     },
                                                     onLongClick = {
                                                         limit = 0
@@ -662,7 +664,8 @@ fun TasbeehScreen(
                                                 .padding(5.dp)
                                                 .align(Alignment.Center)
                                                 .clickable { showLimitDialog = true },
-                                            style = MaterialTheme.typography.bodyMedium
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontWeight = FontWeight.ExtraBold,
                                         )
                                     }
                                 }
@@ -692,7 +695,7 @@ fun TasbeehScreen(
                                     },
                                     label = {
                                         Text(
-                                            "Enter Start Count",
+                                            "Edit Count",
                                             style = MaterialTheme.typography.bodyLarge,
                                             color = DarkColorScheme.inversePrimary
                                         )
@@ -790,7 +793,7 @@ fun TasbeehScreen(
                                     },
                                     label = {
                                         Text(
-                                            "Enter Limit",
+                                            "Edit Limit",
                                             style = MaterialTheme.typography.bodyLarge,
                                             color = DarkColorScheme.inversePrimary
                                         )

@@ -33,10 +33,13 @@ val DarkColorScheme = darkColorScheme(
 val LightColorScheme = lightColorScheme(
     surface = Color(0xFFFDEAC9),
     background = Color(0xFFFDEAC9),
-    primary = Color(0xFFF0C984),
+    primary = Color(0xFFFCD697),
     secondary = Color(0xFF945D3D),
     tertiary = Color(0xFFDB1A34),
     onTertiary = Color.White,
+    primaryContainer = Color(0xA6FCD697), //for +1 button box
+    onPrimaryContainer = Color(0x81945D3D), //for +1 button text
+    inversePrimary = Color(0xFFBE7348), //for textField label
 
     /* Other default colors to override
     onPrimary = Color.White,
@@ -68,7 +71,7 @@ fun TasbeehTheme(
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor =
-                if (darkTheme) DarkColorScheme.background.toArgb() else DarkColorScheme.background.toArgb()
+                DarkColorScheme.surface.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = if (darkTheme) darkTheme else !darkTheme
         }
     }

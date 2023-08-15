@@ -4,17 +4,6 @@ val homeTasbeeh = listOf(
     "تسبیح",
 )
 
-val tasbeehTypes = listOf(
-    "تسبیح",
-    "صلوات",
-    "أهل البيت",
-)
-
-val singleTasbeeh = setOf(
-    "تسبیح",
-    "صلوات",
-)
-
 val ahlebait: List<String> = listOf(
     "يا محمد",
     "يا علي",
@@ -48,6 +37,17 @@ val longTasbeehs: Map<String, String> = mapOf(
     "صلوات" to "أللهم صل على محمد و على أل محمد وبارك وسلم",
 )
 
-val hasSub = setOf(
+val tasbeehTypes = listOf(
+    "تسبیح",
+    "صلوات",
+    "أهل البيت",
+)
+
+val singleTasbeeh = setOf(
+    "تسبیح",
+    "صلوات",
+)
+
+val hasSub = mapOf(
     "أهل البيت" to ahlebait,
 )

@@ -41,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -48,7 +49,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.lamaq.tasbeeh.ui.theme.DarkColorScheme
-import com.lamaq.tasbeeh.ui.theme.Typography
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -75,12 +75,11 @@ fun TasbeehCards(
         modifier = Modifier
             .padding(16.dp)
             .widthIn(min = 200.dp, max = 350.dp)
-            .heightIn(min = 20.dp, max = 300.dp)
+            .heightIn(min = 200.dp, max = 350.dp)
             .background(
                 color = DarkColorScheme.primary,
                 shape = MaterialTheme.shapes.large
-            )
-                ,
+            ),
         elevation = CardDefaults.elevatedCardElevation(
             defaultElevation = 0.dp,
         ),
@@ -91,69 +90,60 @@ fun TasbeehCards(
     ) {
         Column(
             modifier = Modifier
-                .padding(16.dp),
+                .padding(start = 16.dp, end = 16.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            if (tasbeehData.matches(
-                    Regex(
-                        ahlebait.joinToString(
-                            separator = "|",
-                            prefix = "(",
-                            postfix = ")"
-                        )
-                    )
-                )
+            if (
+                hasSub.any { it.value.contains(tasbeehData) }
             ) {
-                Row(
+                Text(
+                    text = tasbeehData,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally),
-                    horizontalArrangement = Arrangement.SpaceAround
-                ) {
-                    Text(
-                        text = tasbeehData,
-                        style = Typography.headlineMedium,
-                        modifier = Modifier
-                            .padding(4.dp),
-                        textAlign = TextAlign.Start,
-                        color = if (tasbeehData.matches(
-                                Regex(
-                                    impNames.joinToString(
-                                        separator = "|",
-                                        prefix = "(",
-                                        postfix = ")"
-                                    )
+                        .padding(4.dp)
+                        .fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Light,
+                    color = if (tasbeehData.matches(
+                            Regex(
+                                impNames.joinToString(
+                                    separator = "|",
+                                    prefix = "(",
+                                    postfix = ")"
                                 )
                             )
-                        ) DarkColorScheme.tertiary else DarkColorScheme.secondary
+                        )
+                    ) DarkColorScheme.tertiary else DarkColorScheme.secondary,
+                    fontSize = MaterialTheme.typography.headlineMedium.fontSize
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier.combinedClickable(
+                        onClick = {},
+                        onLongClick = {
+                            showEditDialog = true
+                        }
                     )
-                    Box(
-                        modifier = Modifier.combinedClickable(
-                            onClick = {},
-                            onLongClick = {
-                                showEditDialog = true
-                            }
-                        )
-                    ) {
-                        Text(
-                            text = totalCount,
-                            style = MaterialTheme.typography.headlineMedium,
-                            modifier = Modifier
-                                .padding(4.dp),
-                            textAlign = TextAlign.End,
-                            color = DarkColorScheme.secondary,
-                        )
-                    }
+                ) {
+                    Text(
+                        text = totalCount,
+                        style = MaterialTheme.typography.headlineMedium,
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        color = DarkColorScheme.secondary,
+                        fontWeight = FontWeight.ExtraLight,
+                    )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
             } else {
                 Text(
                     text = tasbeehData,
-                    style = Typography.headlineLarge,
+                    style = MaterialTheme.typography.headlineLarge,
                     modifier = Modifier
-                        .padding(8.dp),
+                        .padding(top = 16.dp, bottom = 8.dp),
                     textAlign = TextAlign.Start,
                     color = DarkColorScheme.secondary
                 )
@@ -176,7 +166,7 @@ fun TasbeehCards(
                         fontSize = MaterialTheme.typography.headlineLarge.fontSize,
                     )
                 }
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(16.dp))
             }
             ElevatedButton(
                 onClick = {
@@ -309,7 +299,7 @@ fun TasbeehCards(
 @Composable
 fun TasbeehCardsPreview() {
     TasbeehCards(
-        tasbeehData = "صلوات",
+        tasbeehData = ahlebait[0],
         onItemClick = { _, _ -> }
     )
 }

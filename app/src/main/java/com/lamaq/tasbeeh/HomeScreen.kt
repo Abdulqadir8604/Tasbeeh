@@ -28,8 +28,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Close
@@ -79,7 +80,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.lamaq.tasbeeh.components.TasbeehCards
-import com.lamaq.tasbeeh.components.ahlebait
+import com.lamaq.tasbeeh.components.hasSub
 import com.lamaq.tasbeeh.components.homeTasbeeh
 import com.lamaq.tasbeeh.components.singleTasbeeh
 import com.lamaq.tasbeeh.components.tasbeehTypes
@@ -287,7 +288,7 @@ fun HomeScreen(
                                                 .fillMaxWidth(),
                                             icon = {
                                                 Icon(
-                                                    imageVector = if (selectedItem.value == item) {
+                                                    imageVector = if (tasbeehData == item) {
                                                         Icons.Filled.PlayArrow
                                                     } else {
                                                         Icons.Outlined.PlayArrow
@@ -469,7 +470,7 @@ fun HomeScreen(
                                         )
                                     }
                                 }
-                                if (singleTasbeeh.contains(tasbeehData)) {
+                                if (!singleTasbeeh.contains(tasbeehData)) {
                                     Box(
                                         modifier = Modifier
                                             .width(imageSize.dp)
@@ -557,38 +558,38 @@ fun HomeScreen(
                                             )
                                         ),
                                     ) {
-                                        LazyColumn(
+                                        LazyVerticalStaggeredGrid(
                                             modifier = Modifier
                                                 .fillMaxSize()
                                                 .padding(4.dp)
                                                 .scrollable(
-                                                    state = rememberScrollableState { delta ->
-                                                        imageSize += delta.toInt() / 2
-                                                        imageSize = imageSize.coerceIn(150, 300)
+                                                    rememberScrollableState { delta ->
+                                                        imageSize += delta.toInt()
+                                                        imageSize = imageSize.coerceIn(150, 250)
                                                         delta
                                                     },
-                                                    orientation = Orientation.Vertical
+                                                    Orientation.Vertical
                                                 ),
-                                            verticalArrangement = Arrangement.spacedBy(4.dp),
-                                            state = rememberLazyListState(),
-                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            state = rememberLazyStaggeredGridState(),
+                                            columns = StaggeredGridCells.Adaptive(150.dp),
                                             content = {
-                                                items(ahlebait.size) { index ->
-                                                    TasbeehCards(
-                                                        tasbeehData = ahlebait.elementAt(index),
-                                                    ) { _, _ ->
-                                                        if (hasHaptics) haptic.performHapticFeedback(
-                                                            HapticFeedbackType.LongPress
-                                                        )
-                                                        visible = false
-                                                        val tasbeeh = ahlebait.elementAt(index)
-                                                        navController.navigate(
-                                                            "tasbeeh/${tasbeeh}/${
-                                                                sharedPref?.getInt(
-                                                                    tasbeeh,
-                                                                    0
+                                                val selectedSubList = hasSub[tasbeehData]
+                                                selectedSubList?.forEach { tasbeeh ->
+                                                    items(1) {
+                                                        TasbeehCards(
+                                                            tasbeehData = tasbeeh,
+                                                            onItemClick = { _, _ ->
+                                                                if (hasHaptics) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                                visible = false
+                                                                navController.navigate(
+                                                                    "tasbeeh/${tasbeeh}/${
+                                                                        sharedPref?.getInt(
+                                                                            tasbeeh,
+                                                                            0
+                                                                        )
+                                                                    }"
                                                                 )
-                                                            }"
+                                                            }
                                                         )
                                                     }
                                                 }
