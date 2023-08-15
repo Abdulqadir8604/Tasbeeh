@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "89356459703",
+    "project_id": "tasbeeh-c7715",
+    "storage_bucket": "tasbeeh-c7715.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:89356459703:android:2dff800634532991cfb732",
+        "android_client_info": {
+          "package_name": "com.lamaq.tasbeeh"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "89356459703-4ded0p4nsij73dg1cpv978fcbb169h52.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.lamaq.tasbeeh",
+            "certificate_hash": "0adfea7016c008aa6663c74573759a5023815336"
+          }
+        },
+        {
+          "client_id": "89356459703-q0rquci2q2vjf099m70v3h2s0if5q10n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGTdw_DOt_yMDnxQXoVvDr52FVltmm0Ts"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "89356459703-q0rquci2q2vjf099m70v3h2s0if5q10n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

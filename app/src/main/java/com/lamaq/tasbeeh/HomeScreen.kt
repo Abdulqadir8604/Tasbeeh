@@ -69,6 +69,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,6 +80,13 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.remoteconfig.ConfigUpdate
+import com.google.firebase.remoteconfig.ConfigUpdateListener
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigException
+import com.google.firebase.remoteconfig.ktx.remoteConfig
+import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import com.lamaq.tasbeeh.components.TasbeehCards
 import com.lamaq.tasbeeh.components.hasSub
 import com.lamaq.tasbeeh.components.homeTasbeeh
@@ -125,6 +133,34 @@ fun HomeScreen(
             drawerPref.getString("drawer", tasbeehTypes.elementAt(0)) ?: tasbeehTypes.elementAt(0)
         )
     }
+
+    var news by rememberSaveable { mutableStateOf("") }
+
+    val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
+    val configSettings = remoteConfigSettings {
+        minimumFetchIntervalInSeconds = 0
+    }
+    remoteConfig.setConfigSettingsAsync(configSettings)
+    remoteConfig.setDefaultsAsync(R.xml.remote_config_defaults)
+
+    remoteConfig.addOnConfigUpdateListener(object : ConfigUpdateListener {
+        override fun onUpdate(configUpdate : ConfigUpdate) {
+
+            if (configUpdate.updatedKeys.contains("news")) {
+                remoteConfig.activate().addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        news = remoteConfig.getString("news")
+                    } else {
+                        news = "LATEST UPDATES NOT AVAILABLE"
+                    }
+                }
+            }
+        }
+
+        override fun onError(error : FirebaseRemoteConfigException) {
+            println("Error: ${error.message}")
+        }
+    })
 
     val showExitDialog = remember { mutableStateOf(false) }
     var resetAllCounts by remember { mutableStateOf(false) }
@@ -506,7 +542,7 @@ fun HomeScreen(
                                     }
                                 }
                                 Text(
-                                    text = "latest updates will be shown here",
+                                    text = news,
                                     style = MaterialTheme.typography.bodyMedium,
                                     modifier = Modifier.align(Alignment.CenterHorizontally),
                                 )
@@ -565,7 +601,7 @@ fun HomeScreen(
                                                 .scrollable(
                                                     rememberScrollableState { delta ->
                                                         imageSize += delta.toInt()
-                                                        imageSize = imageSize.coerceIn(150, 250)
+                                                        imageSize = imageSize.coerceIn(200, 300)
                                                         delta
                                                     },
                                                     Orientation.Vertical

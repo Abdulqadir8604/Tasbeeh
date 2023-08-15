@@ -138,6 +138,28 @@ fun TasbeehCards(
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
+                ElevatedButton(
+                    onClick = {
+                        onItemClick(
+                            "tasbeeh/$tasbeehData/${sharedPref.getInt(tasbeehData, 0)}",
+                            null
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = ButtonDefaults.elevatedButtonColors(
+                        containerColor = DarkColorScheme.tertiary,
+                        contentColor = DarkColorScheme.onTertiary
+                    ),
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.ArrowForward,
+                        contentDescription = "Go",
+                        tint = DarkColorScheme.onTertiary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
             } else {
                 Text(
                     text = tasbeehData,
@@ -166,29 +188,30 @@ fun TasbeehCards(
                         fontSize = MaterialTheme.typography.headlineLarge.fontSize,
                     )
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-            ElevatedButton(
-                onClick = {
-                    onItemClick(
-                        "tasbeeh/$tasbeehData/${sharedPref.getInt(tasbeehData, 0)}",
-                        null
+                Spacer(modifier = Modifier.height(26.dp))
+                ElevatedButton(
+                    onClick = {
+                        onItemClick(
+                            "tasbeeh/$tasbeehData/${sharedPref.getInt(tasbeehData, 0)}",
+                            null
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = ButtonDefaults.elevatedButtonColors(
+                        containerColor = DarkColorScheme.tertiary,
+                        contentColor = DarkColorScheme.onTertiary
+                    ),
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.ArrowForward,
+                        contentDescription = "Go",
+                        tint = DarkColorScheme.onTertiary,
+                        modifier = Modifier.size(24.dp)
                     )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                colors = ButtonDefaults.elevatedButtonColors(
-                    containerColor = DarkColorScheme.tertiary,
-                    contentColor = DarkColorScheme.onTertiary
-                ),
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.ArrowForward,
-                    contentDescription = "Go",
-                    tint = DarkColorScheme.onTertiary,
-                    modifier = Modifier.size(24.dp)
-                )
+                }
+                Spacer(modifier = Modifier.height(30.dp))
             }
         }
     }
