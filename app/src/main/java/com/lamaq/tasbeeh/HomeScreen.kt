@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -32,6 +34,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Close
@@ -82,6 +85,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationManagerCompat
 import androidx.navigation.NavController
+import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ConfigUpdate
 import com.google.firebase.remoteconfig.ConfigUpdateListener
@@ -90,10 +95,7 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfigException
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import com.lamaq.tasbeeh.components.TasbeehCards
-import com.lamaq.tasbeeh.components.hasSub
-import com.lamaq.tasbeeh.components.homeTasbeeh
-import com.lamaq.tasbeeh.components.singleTasbeeh
-import com.lamaq.tasbeeh.components.tasbeehTypes
+import com.lamaq.tasbeeh.components.TasbeehData
 import com.lamaq.tasbeeh.ui.theme.DarkColorScheme
 import com.lamaq.tasbeeh.ui.theme.DrawerScrimColor
 import com.lamaq.tasbeeh.ui.theme.LightColorScheme
@@ -106,8 +108,53 @@ import kotlin.system.exitProcess
 @SuppressLint("UnnecessaryComposedModifier", "UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(
-    tasbeehData: String, navController: NavController
+    tasbeehName: Any?,
+    navController: NavController,
+    tasbeehData: TasbeehData
 ) {
+
+    val settings = FirebaseFirestoreSettings.Builder()
+        .setCacheSizeBytes(FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED)
+        .build()
+    val db = Firebase.firestore
+    db.firestoreSettings = settings
+
+    var TasbeehData by remember {
+        mutableStateOf(
+            tasbeehData
+        )
+    }
+
+    db.collection("tasbeehs786")
+        .get()
+        .addOnSuccessListener { result ->
+            for (document in result) {
+                val data = document.data
+
+                val longTasbeehs = data["longTasbeehs"] as Map<*, *>
+                val shortNames = data["shortNames"] as List<*>
+                val hasSub = data["hasSub"] as Map<*, *>
+                val homeTasbeeh = data["homeTasbeeh"] as List<*>
+                val impNames = data["impNames"] as List<*>
+                val singleTasbeeh = data["singleTasbeeh"] as List<*>
+                val ahlebait = data["ahlebait"] as List<*>
+                val tasbeehTypes = data["tasbeehTypes"] as List<*>
+
+                TasbeehData = TasbeehData(
+                    longTasbeehs = longTasbeehs,
+                    shortNames = shortNames,
+                    hasSub = hasSub,
+                    homeTasbeeh = homeTasbeeh,
+                    impNames = impNames,
+                    singleTasbeeh = singleTasbeeh,
+                    ahlebait = ahlebait,
+                    tasbeehTypes = tasbeehTypes
+                )
+            }
+        }
+        .addOnFailureListener { exception ->
+            Log.w("FIRESTORE", "Error getting documents.", exception)
+        }
 
     val context = LocalContext.current
 
@@ -134,7 +181,8 @@ fun HomeScreen(
     )
     val selectedItem = remember {
         mutableStateOf(
-            drawerPref.getString("drawer", tasbeehTypes.elementAt(0)) ?: tasbeehTypes.elementAt(0)
+            drawerPref.getString("drawer", TasbeehData.tasbeehTypes.elementAt(0).toString())
+                ?: TasbeehData.tasbeehTypes.elementAt(0).toString()
         )
     }
 
@@ -145,7 +193,7 @@ fun HomeScreen(
     remoteConfig.setConfigSettingsAsync(configSettings)
     remoteConfig.setDefaultsAsync(R.xml.remote_config_defaults)
 
-    val news by remember { mutableStateOf( remoteConfig.getString("news") ) }
+    val news by remember { mutableStateOf(remoteConfig.getString("news")) }
 
     val showExitDialog = remember { mutableStateOf(false) }
     var resetAllCounts by remember { mutableStateOf(false) }
@@ -165,7 +213,7 @@ fun HomeScreen(
         }
     }
 
-    if (showNotifAlert){
+    if (showNotifAlert) {
         settingsPref.edit().putBoolean("askedForNotiPer", true).apply()
         AlertDialog(
             onDismissRequest = {
@@ -260,7 +308,7 @@ fun HomeScreen(
     TasbeehTheme {
 
         remoteConfig.addOnConfigUpdateListener(object : ConfigUpdateListener {
-            override fun onUpdate(configUpdate : ConfigUpdate) {
+            override fun onUpdate(configUpdate: ConfigUpdate) {
 
                 if (configUpdate.updatedKeys.contains("news")) {
                     remoteConfig.activate().addOnCompleteListener {
@@ -269,7 +317,7 @@ fun HomeScreen(
                 }
             }
 
-            override fun onError(error : FirebaseRemoteConfigException) {
+            override fun onError(error: FirebaseRemoteConfigException) {
                 println("Error: ${error.message}")
             }
         })
@@ -373,102 +421,118 @@ fun HomeScreen(
                         scrimColor = DrawerScrimColor,
                         drawerContent = {
                             ModalDrawerSheet(
-                                drawerShape = MaterialTheme.shapes.large,
+                                drawerShape = RoundedCornerShape(
+                                    topStart = 0.dp,
+                                    topEnd = 100.dp,
+                                    bottomStart = 0.dp,
+                                    bottomEnd = 100.dp
+                                ),
                                 drawerContainerColor = DarkColorScheme.background,
                                 drawerTonalElevation = 10.dp,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .fillMaxHeight()
-                                    .padding(start = 20.dp, end = 20.dp),
+                                    .padding(start = 0.dp, end = 30.dp),
                             ) {
-                                    Box(
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
-                                        IconButton(
-                                            modifier = Modifier
-                                                .padding(top = 20.dp, start = 20.dp)
-                                                .align(Alignment.TopStart),
-                                            onClick = {
-                                                resetAllCounts = true
-                                            }) {
-                                            Icon(
-                                                imageVector = Icons.Outlined.Refresh,
-                                                contentDescription = "Reset all counts",
-                                                tint = DarkColorScheme.secondary
-                                            )
-                                        }
-                                        Text(
-                                            text = "تسابيح",
-                                            style = MaterialTheme.typography.headlineMedium,
-                                            color = DarkColorScheme.tertiary,
-                                            modifier = Modifier
-                                                .padding(top = 20.dp)
-                                                .align(Alignment.TopCenter)
-                                        )
-                                        IconButton(
-                                            modifier = Modifier
-                                                .padding(top = 20.dp, end = 20.dp)
-                                                .align(Alignment.TopEnd),
-                                            onClick = {
-                                                scope.launch {
-                                                    drawerState.close()
-                                                }
-                                            }) {
-                                            Icon(
-                                                imageVector = Icons.Outlined.Close,
-                                                contentDescription = "Close Menu",
-                                                tint = DarkColorScheme.secondary
-                                            )
-                                        }
-                                    }
-                                    Spacer(Modifier.height(12.dp))
-                                    tasbeehTypes.forEach { item ->
-                                        NavigationDrawerItem(
-                                            selected = tasbeehData == item,
-                                            modifier = Modifier
-                                                .padding(10.dp)
-                                                .fillMaxWidth(),
-                                            icon = {
-                                                Icon(
-                                                    imageVector = if (tasbeehData == item) {
-                                                        Icons.Filled.PlayArrow
-                                                    } else {
-                                                        Icons.Outlined.PlayArrow
-                                                    },
-                                                    contentDescription = "icon",
-                                                    tint = DarkColorScheme.secondary
-                                                )
-                                            },
-                                            label = {
-                                                Text(
-                                                    text = item,
-                                                    style = MaterialTheme.typography.bodyLarge,
-                                                    color = DarkColorScheme.secondary
-                                                )
-                                            },
-                                            onClick = {
-                                                scope.launch {
-                                                    drawerState.close()
-                                                }
-                                                selectedItem.value = item
-                                                drawerPref.edit().putString("drawer", item).apply()
-                                                navController.navigate("home/$item") // Use the item directly
-                                            },
-
-                                            colors = NavigationDrawerItemDefaults.colors(
-                                                selectedTextColor = DarkColorScheme.secondary,
-                                                unselectedTextColor = DarkColorScheme.secondary,
-                                                selectedContainerColor = DarkColorScheme.primary,
-                                                unselectedContainerColor = DarkColorScheme.surface,
-                                                selectedIconColor = DarkColorScheme.secondary,
-                                                unselectedIconColor = DarkColorScheme.secondary,
-                                            ),
-
-                                            badge = {},
-
-                                            shape = MaterialTheme.shapes.large,
+                                Box(
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    IconButton(
+                                        modifier = Modifier
+                                            .padding(top = 20.dp, start = 20.dp)
+                                            .align(Alignment.TopStart),
+                                        onClick = {
+                                            resetAllCounts = true
+                                        }) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.Refresh,
+                                            contentDescription = "Reset all counts",
+                                            tint = DarkColorScheme.secondary
                                         )
                                     }
+                                    Text(
+                                        text = "تسابيح",
+                                        style = MaterialTheme.typography.headlineMedium,
+                                        color = DarkColorScheme.tertiary,
+                                        modifier = Modifier
+                                            .padding(top = 20.dp)
+                                            .align(Alignment.TopCenter)
+                                    )
+                                    IconButton(
+                                        modifier = Modifier
+                                            .padding(top = 20.dp, end = 40.dp)
+                                            .align(Alignment.TopEnd),
+                                        onClick = {
+                                            scope.launch {
+                                                drawerState.close()
+                                            }
+                                        }) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.Close,
+                                            contentDescription = "Close Menu",
+                                            tint = DarkColorScheme.secondary
+                                        )
+                                    }
+                                }
+                                Spacer(Modifier.height(12.dp))
+                                TasbeehData.tasbeehTypes.forEach { item ->
+                                    NavigationDrawerItem(
+                                        selected = tasbeehName == item,
+                                        modifier = Modifier
+                                            .padding(
+                                                start = 0.dp,
+                                                end = 30.dp,
+                                                top = 10.dp,
+                                                bottom = 10.dp
+                                            )
+                                            .fillMaxWidth(),
+                                        icon = {
+                                            Icon(
+                                                imageVector = if (tasbeehName == item) {
+                                                    Icons.Filled.PlayArrow
+                                                } else {
+                                                    Icons.Outlined.PlayArrow
+                                                },
+                                                contentDescription = "icon",
+                                                tint = DarkColorScheme.secondary
+                                            )
+                                        },
+                                        label = {
+                                            Text(
+                                                text = item.toString(),
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                color = DarkColorScheme.secondary
+                                            )
+                                        },
+                                        onClick = {
+                                            scope.launch {
+                                                drawerState.close()
+                                            }
+                                            selectedItem.value = item.toString()
+                                            drawerPref.edit().putString("drawer", item.toString())
+                                                .apply()
+                                            navController.navigate("home/$item") // Use the item directly
+                                        },
+
+                                        colors = NavigationDrawerItemDefaults.colors(
+                                            selectedTextColor = DarkColorScheme.secondary,
+                                            unselectedTextColor = DarkColorScheme.secondary,
+                                            selectedContainerColor = DarkColorScheme.primary,
+                                            unselectedContainerColor = DarkColorScheme.surface,
+                                            selectedIconColor = DarkColorScheme.secondary,
+                                            unselectedIconColor = DarkColorScheme.secondary,
+                                        ),
+
+                                        badge = {},
+
+                                        shape = RoundedCornerShape(
+                                            topStart = 0.dp,
+                                            topEnd = 30.dp,
+                                            bottomStart = 0.dp,
+                                            bottomEnd = 30.dp
+                                        ),
+                                    )
+                                }
                                 Box(
                                     modifier = Modifier.fillMaxSize()
                                 ) {
@@ -612,7 +676,7 @@ fun HomeScreen(
                                         )
                                     }
                                 }
-                                if (!singleTasbeeh.contains(tasbeehData)) {
+                                if (!TasbeehData.singleTasbeeh.contains(tasbeehName)) {
                                     Box(
                                         modifier = Modifier
                                             .width(imageSize.dp)
@@ -648,14 +712,14 @@ fun HomeScreen(
                                     }
                                 }
                                 Text(
-                                    text = news.toString(),
+                                    text = news,
                                     style = MaterialTheme.typography.bodyMedium,
                                     modifier = Modifier.align(Alignment.CenterHorizontally),
                                 )
 
                                 Spacer(modifier = Modifier.height(20.dp))
 
-                                if (singleTasbeeh.contains(tasbeehData)) {
+                                if (TasbeehData.singleTasbeeh.contains(tasbeehName)) {
                                     AnimatedVisibility(
                                         visible = visible,
                                         enter = slideInVertically(
@@ -670,22 +734,22 @@ fun HomeScreen(
                                         ),
                                     ) {
                                         TasbeehCards(
-                                            tasbeehData = tasbeehData,
+                                            tasbeehName = tasbeehName.toString(),
                                         ) { _, _ ->
                                             if (hasHaptics) haptic.performHapticFeedback(
                                                 HapticFeedbackType.LongPress
                                             )
                                             visible = false
                                             navController.navigate(
-                                                "tasbeeh/${tasbeehData}/${
+                                                "tasbeeh/${tasbeehName}/${
                                                     sharedPref?.getInt(
-                                                        tasbeehData, 0
+                                                        tasbeehName.toString(), 0
                                                     )
                                                 }"
                                             )
                                         }
                                     }
-                                } else if (!singleTasbeeh.contains(tasbeehData)
+                                } else if (!TasbeehData.singleTasbeeh.contains(tasbeehName)
                                 ) {
                                     AnimatedVisibility(
                                         visible = visible,
@@ -713,30 +777,54 @@ fun HomeScreen(
                                                     Orientation.Vertical
                                                 ),
                                             state = rememberLazyStaggeredGridState(),
-                                            columns = StaggeredGridCells.Adaptive(150.dp),
-                                            content = {
-                                                val selectedSubList = hasSub[tasbeehData]
-                                                selectedSubList?.forEach { tasbeeh ->
-                                                    items(1) {
-                                                        TasbeehCards(
-                                                            tasbeehData = tasbeeh,
-                                                            onItemClick = { _, _ ->
-                                                                if (hasHaptics) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            columns = StaggeredGridCells.Adaptive(150.dp)
+                                        ) {
+                                            val selectedSubListKey =
+                                                TasbeehData.hasSub[tasbeehName.toString()] as String?
+                                            selectedSubListKey?.let { listName ->
+                                                val property = TasbeehData::class.members
+                                                    .firstOrNull { it.name == listName }
+                                                if (
+                                                    property != null &&
+                                                    property.returnType.classifier == List::class
+                                                ) {
+                                                    val selectedSubList =
+                                                        property.call(TasbeehData) as List<*>
+                                                    selectedSubList.forEach { tasbeeh ->
+                                                        items(1) {
+                                                            TasbeehCards(
+                                                                tasbeehName = tasbeeh.toString(),
+                                                            ) { _, _ ->
+                                                                if (hasHaptics) haptic.performHapticFeedback(
+                                                                    HapticFeedbackType.LongPress
+                                                                )
                                                                 visible = false
                                                                 navController.navigate(
                                                                     "tasbeeh/${tasbeeh}/${
                                                                         sharedPref?.getInt(
-                                                                            tasbeeh,
+                                                                            tasbeeh.toString(),
                                                                             0
                                                                         )
                                                                     }"
                                                                 )
                                                             }
-                                                        )
+                                                        }
                                                     }
+                                                } else {
+                                                    Toast.makeText(
+                                                        context,
+                                                        "Error: Property not found",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
                                                 }
+                                            } ?: run {
+                                                Toast.makeText(
+                                                    context,
+                                                    "Error: Property is null",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
                                             }
-                                        )
+                                        }
                                     }
                                 } else {
                                     Text(
@@ -757,11 +845,11 @@ fun HomeScreen(
     }
 
     BackHandler {
-        if (tasbeehData == homeTasbeeh.elementAt(0)) {
+        if (tasbeehName == TasbeehData.homeTasbeeh.elementAt(0)) {
             showExitDialog.value = true
         } else {
-            navController.navigate("home/${homeTasbeeh.elementAt(0)}")
-            drawerPref.edit().putString("drawer", homeTasbeeh.elementAt(0)).apply()
+            navController.navigate("home/${TasbeehData.homeTasbeeh.elementAt(0)}")
+            drawerPref.edit().putString("drawer", TasbeehData.homeTasbeeh.elementAt(0).toString()).apply()
         }
     }
 }

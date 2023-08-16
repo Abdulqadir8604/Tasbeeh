@@ -49,5 +49,16 @@ val singleTasbeeh = listOf(
 )
 
 val hasSub = mapOf(
-    "أهل البيت" to ahlebait,
+    "أهل البيت" to "ahlebait",
+)
+
+data class TasbeehData(
+    val longTasbeehs: Map<*, *>,
+    val shortNames: List<*>,
+    val hasSub: Map<*, *>,
+    val homeTasbeeh: List<*>,
+    val impNames: List<*>,
+    val singleTasbeeh: List<*>,
+    val ahlebait: List<*>,
+    val tasbeehTypes: List<*>
 )

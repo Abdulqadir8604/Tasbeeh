@@ -8,6 +8,7 @@ import android.media.AudioAttributes
 import android.media.SoundPool
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -86,8 +87,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
+import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import com.lamaq.tasbeeh.components.TasbeehData
+import com.lamaq.tasbeeh.components.ahlebait
+import com.lamaq.tasbeeh.components.hasSub
+import com.lamaq.tasbeeh.components.homeTasbeeh
+import com.lamaq.tasbeeh.components.impNames
 import com.lamaq.tasbeeh.components.longTasbeehs
 import com.lamaq.tasbeeh.components.shortNames
+import com.lamaq.tasbeeh.components.singleTasbeeh
+import com.lamaq.tasbeeh.components.tasbeehTypes
 import com.lamaq.tasbeeh.ui.theme.DarkColorScheme
 import com.lamaq.tasbeeh.ui.theme.LightColorScheme
 import com.lamaq.tasbeeh.ui.theme.TasbeehTheme
@@ -100,6 +111,58 @@ fun TasbeehScreen(
     tasbeehName: String,
     navController: NavController,
 ) {
+
+    val settings = FirebaseFirestoreSettings.Builder()
+        .setCacheSizeBytes(FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED)
+        .build()
+    val db = Firebase.firestore
+    db.firestoreSettings = settings
+
+    var TasbeehData by remember {
+        mutableStateOf(
+            TasbeehData(
+                longTasbeehs = longTasbeehs,
+                shortNames = shortNames,
+                hasSub = hasSub,
+                homeTasbeeh = homeTasbeeh,
+                impNames = impNames,
+                singleTasbeeh = singleTasbeeh,
+                ahlebait = ahlebait,
+                tasbeehTypes = tasbeehTypes
+            )
+        )
+    }
+
+    db.collection("tasbeehs786")
+        .get()
+        .addOnSuccessListener { result ->
+            for (document in result) {
+                val data = document.data
+
+                val longTasbeehs = data["longTasbeehs"] as Map<*, *>
+                val shortNames = data["shortNames"] as List<*>
+                val hasSub = data["hasSub"] as Map<*, *>
+                val homeTasbeeh = data["homeTasbeeh"] as List<*>
+                val impNames = data["impNames"] as List<*>
+                val singleTasbeeh = data["singleTasbeeh"] as List<*>
+                val ahlebait = data["ahlebait"] as List<*>
+                val tasbeehTypes = data["tasbeehTypes"] as List<*>
+
+                TasbeehData = TasbeehData(
+                    longTasbeehs = longTasbeehs,
+                    shortNames = shortNames,
+                    hasSub = hasSub,
+                    homeTasbeeh = homeTasbeeh,
+                    impNames = impNames,
+                    singleTasbeeh = singleTasbeeh,
+                    ahlebait = ahlebait,
+                    tasbeehTypes = tasbeehTypes
+                )
+            }
+        }
+        .addOnFailureListener { exception ->
+            Log.w("FIRESTORE", "Error getting documents.", exception)
+        }
 
     var visible by remember { mutableStateOf(false) }
 
@@ -393,15 +456,15 @@ fun TasbeehScreen(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
-                                    text = if (tasbeehName in longTasbeehs)
-                                        longTasbeehs.filter { it.key == tasbeehName }.values.first()
+                                    text = if (tasbeehName in TasbeehData.longTasbeehs)
+                                        TasbeehData.longTasbeehs.filter { it.key == tasbeehName }.values.first().toString()
                                     else
                                         tasbeehName,
-                                    style = if (!shortNames.contains(tasbeehName))
+                                    style = if (!TasbeehData.shortNames.contains(tasbeehName))
                                         MaterialTheme.typography.headlineSmall
                                     else
                                         MaterialTheme.typography.headlineLarge,
-                                    modifier = if (!shortNames.contains(tasbeehName))
+                                    modifier = if (!TasbeehData.shortNames.contains(tasbeehName))
                                         Modifier.padding(top = 60.dp)
                                     else
                                         Modifier.padding(top = 30.dp),
@@ -417,7 +480,7 @@ fun TasbeehScreen(
                                     )
                                 Text(
                                     text = counter.toString(),
-                                    modifier = if (shortNames.contains(tasbeehName)) {
+                                    modifier = if (TasbeehData.shortNames.contains(tasbeehName)) {
                                         Modifier
                                             .padding(top = 40.dp, bottom = 8.dp)
                                             .fillMaxWidth(1f)

@@ -68,6 +68,7 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging-ktx:23.2.1")
     implementation ("com.google.firebase:firebase-inappmessaging-display-ktx:20.3.3")
     implementation("com.google.firebase:firebase-analytics-ktx:21.3.0")
+    implementation("com.google.firebase:firebase-firestore-ktx:24.7.0")
 
     implementation("com.google.accompanist:accompanist-permissions:0.30.1")
 
@@ -77,4 +78,5 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+    implementation(kotlin("reflect"))
 }

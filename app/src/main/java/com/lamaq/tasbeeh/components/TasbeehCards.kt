@@ -1,6 +1,7 @@
 package com.lamaq.tasbeeh.components
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -45,17 +46,72 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.lamaq.tasbeeh.ui.theme.DarkColorScheme
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun TasbeehCards(
-    tasbeehData: String,
+    tasbeehName: String,
     onItemClick: (String, Any?) -> Unit,
 ) {
+
+    val settings = FirebaseFirestoreSettings.Builder()
+        .setCacheSizeBytes(FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED)
+        .build()
+    val db = Firebase.firestore
+    db.firestoreSettings = settings
+
+    var TasbeehData by remember {
+        mutableStateOf(
+            TasbeehData(
+                longTasbeehs = longTasbeehs,
+                shortNames = shortNames,
+                hasSub = hasSub,
+                homeTasbeeh = homeTasbeeh,
+                impNames = impNames,
+                singleTasbeeh = singleTasbeeh,
+                ahlebait = ahlebait,
+                tasbeehTypes = tasbeehTypes
+            )
+        )
+    }
+
+    db.collection("tasbeehs786")
+        .get()
+        .addOnSuccessListener { result ->
+            for (document in result) {
+                val data = document.data
+
+                val longTasbeehs = data["longTasbeehs"] as Map<*, *>
+                val shortNames = data["shortNames"] as List<*>
+                val hasSub = data["hasSub"] as Map<*, *>
+                val homeTasbeeh = data["homeTasbeeh"] as List<*>
+                val impNames = data["impNames"] as List<*>
+                val singleTasbeeh = data["singleTasbeeh"] as List<*>
+                val ahlebait = data["ahlebait"] as List<*>
+                val tasbeehTypes = data["tasbeehTypes"] as List<*>
+
+                TasbeehData = TasbeehData(
+                    longTasbeehs = longTasbeehs,
+                    shortNames = shortNames,
+                    hasSub = hasSub,
+                    homeTasbeeh = homeTasbeeh,
+                    impNames = impNames,
+                    singleTasbeeh = singleTasbeeh,
+                    ahlebait = ahlebait,
+                    tasbeehTypes = tasbeehTypes
+                )
+            }
+        }
+        .addOnFailureListener { exception ->
+            Log.w("FIRESTORE", "Error getting documents.", exception)
+        }
+    
     val context = LocalContext.current
     val sharedPref = context.getSharedPreferences(
         "tasbeehs",
@@ -69,7 +125,7 @@ fun TasbeehCards(
     var totalCount by remember {
         mutableStateOf("")
     }
-    totalCount = sharedPref.getInt(tasbeehData, 0).toString()
+    totalCount = sharedPref.getInt(tasbeehName, 0).toString()
 
     Card(
         modifier = Modifier
@@ -94,20 +150,31 @@ fun TasbeehCards(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             if (
-                hasSub.any { it.value.contains(tasbeehData) }
+                TasbeehData.hasSub.values.any {
+                    val property = TasbeehData::class.members
+                        .firstOrNull { it.name == it.name }
+                    if (
+                        property != null &&
+                        property.returnType.classifier == List::class
+                    ) {
+                        val list = property.call(TasbeehData) as List<*>
+                        list.contains(tasbeehName)
+                    } else {
+                        false
+                    }
+                }
             ) {
                 Text(
-                    text = tasbeehData,
+                    text = tasbeehName,
                     modifier = Modifier
                         .padding(4.dp)
                         .fillMaxWidth(),
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.Light,
-                    color = if (tasbeehData.matches(
+                    color = if (tasbeehName.matches(
                             Regex(
-                                impNames.joinToString(
+                                TasbeehData.impNames.joinToString(
                                     separator = "|",
                                     prefix = "(",
                                     postfix = ")"
@@ -141,7 +208,7 @@ fun TasbeehCards(
                 ElevatedButton(
                     onClick = {
                         onItemClick(
-                            "tasbeeh/$tasbeehData/${sharedPref.getInt(tasbeehData, 0)}",
+                            "tasbeeh/$tasbeehName/${sharedPref.getInt(tasbeehName, 0)}",
                             null
                         )
                     },
@@ -162,7 +229,7 @@ fun TasbeehCards(
                 }
             } else {
                 Text(
-                    text = tasbeehData,
+                    text = tasbeehName,
                     style = MaterialTheme.typography.headlineLarge,
                     modifier = Modifier
                         .padding(top = 16.dp, bottom = 8.dp),
@@ -192,7 +259,7 @@ fun TasbeehCards(
                 ElevatedButton(
                     onClick = {
                         onItemClick(
-                            "tasbeeh/$tasbeehData/${sharedPref.getInt(tasbeehData, 0)}",
+                            "tasbeeh/$tasbeehName/${sharedPref.getInt(tasbeehName, 0)}",
                             null
                         )
                     },
@@ -276,7 +343,7 @@ fun TasbeehCards(
                             }
 
                             with(sharedPref.edit()) {
-                                putInt(tasbeehData, totalCount.toInt())
+                                putInt(tasbeehName, totalCount.toInt())
                                 apply()
                             }
                         },
@@ -316,14 +383,5 @@ fun TasbeehCards(
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun TasbeehCardsPreview() {
-    TasbeehCards(
-        tasbeehData = ahlebait[0],
-        onItemClick = { _, _ -> }
-    )
 }
 
