@@ -69,6 +69,8 @@ dependencies {
     implementation ("com.google.firebase:firebase-inappmessaging-display-ktx:20.3.3")
     implementation("com.google.firebase:firebase-analytics-ktx:21.3.0")
 
+    implementation("com.google.accompanist:accompanist-permissions:0.30.1")
+
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

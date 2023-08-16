@@ -2,6 +2,7 @@ package com.lamaq.tasbeeh
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -35,6 +36,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
@@ -69,7 +71,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,6 +80,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.core.app.NotificationManagerCompat
 import androidx.navigation.NavController
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ConfigUpdate
@@ -107,6 +109,8 @@ fun HomeScreen(
     tasbeehData: String, navController: NavController
 ) {
 
+    val context = LocalContext.current
+
     var visible by remember { mutableStateOf(false) }
 
     val sharedPref: SharedPreferences? = LocalContext.current.getSharedPreferences(
@@ -134,8 +138,6 @@ fun HomeScreen(
         )
     }
 
-    var news by rememberSaveable { mutableStateOf("") }
-
     val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
     val configSettings = remoteConfigSettings {
         minimumFetchIntervalInSeconds = 0
@@ -143,31 +145,135 @@ fun HomeScreen(
     remoteConfig.setConfigSettingsAsync(configSettings)
     remoteConfig.setDefaultsAsync(R.xml.remote_config_defaults)
 
-    remoteConfig.addOnConfigUpdateListener(object : ConfigUpdateListener {
-        override fun onUpdate(configUpdate : ConfigUpdate) {
-
-            if (configUpdate.updatedKeys.contains("news")) {
-                remoteConfig.activate().addOnCompleteListener {
-                    if (it.isSuccessful) {
-                        news = remoteConfig.getString("news")
-                    } else {
-                        news = "LATEST UPDATES NOT AVAILABLE"
-                    }
-                }
-            }
-        }
-
-        override fun onError(error : FirebaseRemoteConfigException) {
-            println("Error: ${error.message}")
-        }
-    })
+    val news by remember { mutableStateOf( remoteConfig.getString("news") ) }
 
     val showExitDialog = remember { mutableStateOf(false) }
     var resetAllCounts by remember { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
 
+    var showNotifAlert by remember { mutableStateOf(false) }
+    var showRationalAlertforNotif by remember { mutableStateOf(false) }
+    val askedForNotiPer = settingsPref.getBoolean("askedForNotiPer", false)
+
+    val notificationManager = NotificationManagerCompat.from(LocalContext.current)
+    val areNotificationsEnabled = notificationManager.areNotificationsEnabled()
+
+    if (!askedForNotiPer) {
+        if (!areNotificationsEnabled) {
+            showNotifAlert = true
+        }
+    }
+
+    if (showNotifAlert){
+        settingsPref.edit().putBoolean("askedForNotiPer", true).apply()
+        AlertDialog(
+            onDismissRequest = {
+                showNotifAlert = false
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showNotifAlert = false
+                        val intent = Intent()
+                        intent.action = "android.settings.APP_NOTIFICATION_SETTINGS"
+                        intent.putExtra("android.provider.extra.APP_PACKAGE", context.packageName)
+                        context.startActivity(intent)
+                    }
+                ) {
+                    Text("Enable", color = DarkColorScheme.inversePrimary)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showNotifAlert = false
+                        showRationalAlertforNotif = true
+                    }
+                ) {
+                    Text("Dismiss", color = DarkColorScheme.inversePrimary)
+                }
+            },
+            containerColor = DarkColorScheme.background,
+            icon = {
+                Icon(
+                    imageVector = Icons.Outlined.Notifications,
+                    contentDescription = "notifications",
+                    tint = DarkColorScheme.inversePrimary,
+                    modifier = Modifier.size(30.dp)
+                )
+            },
+            title = {
+                Text(text = "Enable Notifications")
+            },
+            titleContentColor = DarkColorScheme.secondary,
+            text = {
+                Text(text = "Please enable notifications to receive updates. We promise not to spam you :)")
+            },
+            textContentColor = DarkColorScheme.secondary,
+        )
+    }
+
+    if (showRationalAlertforNotif) {
+        AlertDialog(
+            onDismissRequest = {
+                showRationalAlertforNotif = false
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showRationalAlertforNotif = false
+                    }
+                ) {
+                    Text("Okay", color = DarkColorScheme.inversePrimary)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showRationalAlertforNotif = false
+                    }
+                ) {
+                    Text("Dismiss", color = DarkColorScheme.inversePrimary)
+                }
+            },
+            containerColor = DarkColorScheme.background,
+            icon = {
+                Icon(
+                    imageVector = Icons.Outlined.Notifications,
+                    contentDescription = "notifications",
+                    tint = DarkColorScheme.inversePrimary,
+                    modifier = Modifier.size(30.dp)
+                )
+            },
+            title = {
+                Text(text = "Enable Notifications through device settings on your own whenever you want")
+            },
+            titleContentColor = DarkColorScheme.secondary,
+            text = {
+                Text(text = "Notifications are required to receive important updates and announcements!!")
+            },
+            textContentColor = DarkColorScheme.secondary,
+        )
+    }
+
     TasbeehTheme {
+
+        remoteConfig.addOnConfigUpdateListener(object : ConfigUpdateListener {
+            override fun onUpdate(configUpdate : ConfigUpdate) {
+
+                if (configUpdate.updatedKeys.contains("news")) {
+                    remoteConfig.activate().addOnCompleteListener {
+                        remoteConfig.getString("news")
+                    }
+                }
+            }
+
+            override fun onError(error : FirebaseRemoteConfigException) {
+                println("Error: ${error.message}")
+            }
+        })
+
         if (resetAllCounts) {
             AlertDialog(
                 onDismissRequest = {
@@ -542,7 +648,7 @@ fun HomeScreen(
                                     }
                                 }
                                 Text(
-                                    text = news,
+                                    text = news.toString(),
                                     style = MaterialTheme.typography.bodyMedium,
                                     modifier = Modifier.align(Alignment.CenterHorizontally),
                                 )

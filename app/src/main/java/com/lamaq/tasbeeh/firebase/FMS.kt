@@ -1,44 +1,53 @@
 package com.lamaq.tasbeeh.firebase
 
+import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.net.Uri
-import android.os.Build
-import androidx.annotation.RequiresApi
+import android.app.NotificationManager.IMPORTANCE_DEFAULT
+import android.app.PendingIntent
+import android.app.PendingIntent.FLAG_IMMUTABLE
+import android.content.Context
+import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
+import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.core.graphics.drawable.toIcon
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.lamaq.tasbeeh.R
 
 class FMS: FirebaseMessagingService() {
-    @RequiresApi(Build.VERSION_CODES.S)
-    override fun onMessageReceived(message: RemoteMessage) {
-        var title = message.notification?.title
-        var body = message.notification?.body
-        var image = message.notification?.imageUrl
+    override fun onNewToken(token: String) {
+        super.onNewToken(token)
+        Log.d("TAG", "onNewToken: $token")
+    }
 
-        var notificationBuilder = NotificationCompat.Builder(this, "tasbeeh_aq")
-            .setContentTitle(title)
-            .setContentText(body)
-            .setSmallIcon(R.drawable.ic_launcher)
-            .setStyle(NotificationCompat.BigPictureStyle().bigPicture(image?.let { it }?.toIcon() ?: return))
-            .setCategory(NotificationCompat.CATEGORY_MESSAGE)
-            .setAutoCancel(true)
-            .extend { builder ->
-                builder.setSmallIcon(R.drawable.ic_launcher)
-            }
-            .setColor(resources.getColor(R.color.primary))
-            .setStyle(NotificationCompat.BigTextStyle().bigText(body))
-            .setDefaults(NotificationCompat.DEFAULT_ALL)
-            .setVibrate(longArrayOf(1000, 1000, 1000, 1000, 1000))
-            .setSound(Uri.parse("android.resource://" + packageName + "/" + R.raw.click))
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-
-        notificationBuilder.build().let {
-            val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.notify(0, it)
+    override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        remoteMessage.notification?.let { message ->
+            sendNotification(message)
+        }
+    }
+    private fun sendNotification(message: RemoteMessage.Notification) {
+        val intent = Intent(this, FMS::class.java).apply {
+            addFlags(FLAG_ACTIVITY_CLEAR_TOP)
         }
 
-        super.onMessageReceived(message)
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, intent, FLAG_IMMUTABLE
+        )
+
+        val channelId = this.getString(R.string.default_notification_channel_id)
+
+        val notificationBuilder = NotificationCompat.Builder(this, channelId)
+            .setContentTitle(message.title)
+            .setContentText(message.body)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+
+        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        val channel = NotificationChannel(channelId, "Tasbeeh", IMPORTANCE_DEFAULT)
+        manager.createNotificationChannel(channel)
+
+        manager.notify(System.currentTimeMillis().toInt(), notificationBuilder.build())
     }
 }

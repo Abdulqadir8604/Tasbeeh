@@ -4,7 +4,7 @@ val homeTasbeeh = listOf(
     "تسبیح",
 )
 
-val ahlebait: List<String> = listOf(
+val ahlebait = listOf(
     "يا محمد",
     "يا علي",
     "يا فاطمة",
@@ -15,13 +15,13 @@ val ahlebait: List<String> = listOf(
     "يا طيب",
 )
 
-val impNames = setOf(
+val impNames = listOf(
     "يا علي",
     "يا فاطمة",
     "يا حسين",
 )
 
-val shortNames: Set<String> = setOf(
+val shortNames = listOf(
     "تسبیح",
     "يا محمد",
     "يا علي",
@@ -43,7 +43,7 @@ val tasbeehTypes = listOf(
     "أهل البيت",
 )
 
-val singleTasbeeh = setOf(
+val singleTasbeeh = listOf(
     "تسبیح",
     "صلوات",
 )
