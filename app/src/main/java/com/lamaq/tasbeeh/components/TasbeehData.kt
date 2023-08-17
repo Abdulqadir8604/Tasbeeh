@@ -59,6 +59,5 @@ data class TasbeehData(
     val homeTasbeeh: List<*>,
     val impNames: List<*>,
     val singleTasbeeh: List<*>,
-    val ahlebait: List<*>,
     val tasbeehTypes: List<*>
 )

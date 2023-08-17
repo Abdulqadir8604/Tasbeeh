@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.widget.Toast
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -84,6 +84,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationManagerCompat
 import androidx.navigation.NavController
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ConfigUpdate
 import com.google.firebase.remoteconfig.ConfigUpdateListener
@@ -109,6 +111,7 @@ fun HomeScreen(
     navController: NavController,
     tasbeehData: TasbeehData
 ) {
+    val db = Firebase.firestore
 
     val context = LocalContext.current
 
@@ -689,6 +692,7 @@ fun HomeScreen(
                                     ) {
                                         TasbeehCards(
                                             tasbeehName = tasbeehName.toString(),
+                                            fieldName = tasbeehName.toString(),
                                             tasbeehData = tasbeehData,
                                         ) { _, _ ->
                                             if (hasHaptics) haptic.performHapticFeedback(
@@ -734,52 +738,43 @@ fun HomeScreen(
                                             state = rememberLazyStaggeredGridState(),
                                             columns = StaggeredGridCells.Adaptive(150.dp)
                                         ) {
-                                            val selectedSubListKey =
-                                                tasbeehData.hasSub[tasbeehName.toString()] as String?
-                                            selectedSubListKey?.let { listName ->
-                                                val property = tasbeehData::class.members
-                                                    .firstOrNull { it.name == listName }
-                                                if (
-                                                    property != null &&
-                                                    property.returnType.classifier == List::class
-                                                ) {
-                                                    val selectedSubList =
-                                                        property.call(tasbeehData) as List<*>
-                                                    selectedSubList.forEach { tasbeeh ->
-                                                        items(1) {
-                                                            TasbeehCards(
-                                                                tasbeehName = tasbeeh.toString(),
-                                                                tasbeehData = tasbeehData,
-                                                            ) { _, _ ->
-                                                                if (hasHaptics) haptic.performHapticFeedback(
-                                                                    HapticFeedbackType.LongPress
-                                                                )
-                                                                visible = false
-                                                                navController.navigate(
-                                                                    "tasbeeh/${tasbeeh}/${
-                                                                        sharedPref?.getInt(
-                                                                            tasbeeh.toString(),
-                                                                            0
-                                                                        )
-                                                                    }"
-                                                                )
+                                            val docRef =
+                                                tasbeehData.hasSub[tasbeehName.toString()] as DocumentReference
+                                            Log.d("FIRESTORE", "HomeScreen:  $tasbeehName")
+                                            Log.d("FIRESTORE", "HomeScreen:  $docRef")
+                                            docRef.get()
+                                                .addOnSuccessListener { documentSnapshot ->
+                                                    if (documentSnapshot.exists()) {
+                                                        val data = documentSnapshot.data
+                                                        (data?.get(tasbeehName.toString()) as List<*>?)?.forEach { tasbeeh ->
+                                                            items(1) {
+                                                                TasbeehCards(
+                                                                    tasbeehName = tasbeeh.toString(),
+                                                                    fieldName = tasbeehName.toString(),
+                                                                    tasbeehData = tasbeehData,
+                                                                ) { _, _ ->
+                                                                    if (hasHaptics) haptic.performHapticFeedback(
+                                                                        HapticFeedbackType.LongPress
+                                                                    )
+                                                                    visible = false
+                                                                    navController.navigate(
+                                                                        "tasbeeh/${tasbeeh}/${
+                                                                            sharedPref?.getInt(
+                                                                                tasbeeh.toString(),
+                                                                                0
+                                                                            )
+                                                                        }"
+                                                                    )
+                                                                }
                                                             }
                                                         }
+                                                    } else {
+                                                        // Handle the failure
                                                     }
-                                                } else {
-                                                    Toast.makeText(
-                                                        context,
-                                                        "Error: Property not found",
-                                                        Toast.LENGTH_SHORT
-                                                    ).show()
                                                 }
-                                            } ?: run {
-                                                Toast.makeText(
-                                                    context,
-                                                    "Error: Property is null",
-                                                    Toast.LENGTH_SHORT
-                                                ).show()
-                                            }
+                                                .addOnFailureListener {
+                                                    // Handle the failure
+                                                }
                                         }
                                     }
                                 } else {
@@ -805,7 +800,8 @@ fun HomeScreen(
             showExitDialog.value = true
         } else {
             navController.navigate("home/${tasbeehData.homeTasbeeh.elementAt(0)}")
-            drawerPref.edit().putString("drawer", tasbeehData.homeTasbeeh.elementAt(0).toString()).apply()
+            drawerPref.edit().putString("drawer", tasbeehData.homeTasbeeh.elementAt(0).toString())
+                .apply()
         }
     }
 }

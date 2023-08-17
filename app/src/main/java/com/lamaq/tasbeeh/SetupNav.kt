@@ -15,7 +15,6 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.lamaq.tasbeeh.components.TasbeehData
-import com.lamaq.tasbeeh.components.ahlebait
 import com.lamaq.tasbeeh.components.hasSub
 import com.lamaq.tasbeeh.components.homeTasbeeh
 import com.lamaq.tasbeeh.components.impNames
@@ -37,7 +36,6 @@ fun SetupNav(
                 homeTasbeeh = homeTasbeeh,
                 impNames = impNames,
                 singleTasbeeh = singleTasbeeh,
-                ahlebait = ahlebait,
                 tasbeehTypes = tasbeehTypes
             )
         )
@@ -60,7 +58,6 @@ fun SetupNav(
                 homeTasbeeh = result.data?.get("homeTasbeeh") as List<*>,
                 impNames = result.data?.get("impNames") as List<*>,
                 singleTasbeeh = result.data?.get("singleTasbeeh") as List<*>,
-                ahlebait = result.data?.get("ahlebait") as List<*>,
                 tasbeehTypes = result.data?.get("tasbeehTypes") as List<*>,
             )
         }

@@ -1,6 +1,7 @@
 package com.lamaq.tasbeeh.components
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -47,18 +48,40 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.lamaq.tasbeeh.ui.theme.DarkColorScheme
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun TasbeehCards(
     tasbeehName: String,
+    fieldName: String,
     tasbeehData: TasbeehData,
     onItemClick: (String, Any?) -> Unit,
 ) {
 
-    
+    val db = Firebase.firestore
+    val documentReference = db.document("tasbeehs786/$fieldName")
+    Log.d("FIRESTORE", "tasbeehs786/$fieldName")
     val context = LocalContext.current
+
+    var multiTasbeeh by remember { mutableStateOf(false) }
+
+    documentReference.get().addOnSuccessListener { documentSnapshot ->
+        if (documentSnapshot.exists()) {
+            val fieldValue = documentSnapshot.get(fieldName)!! as List<*>
+            multiTasbeeh = tasbeehName in fieldValue
+            Log.d("FIRESTORE", "TasbeehCards: $fieldValue: $tasbeehName")
+        } else {
+            multiTasbeeh = false
+            Log.d("FIRESTORE", "TasbeehCards: error in finding $tasbeehName")
+        }
+    }.addOnFailureListener { e ->
+        Log.w("TasbeehCards", "Error getting documents.", e)
+    }
+
+
     val sharedPref = context.getSharedPreferences(
         "tasbeehs",
         Context.MODE_PRIVATE
@@ -96,21 +119,7 @@ fun TasbeehCards(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (
-                tasbeehData.hasSub.values.any {
-                    val property = TasbeehData::class.members
-                        .firstOrNull { it.name == it.name }
-                    if (
-                        property != null &&
-                        property.returnType.classifier == List::class
-                    ) {
-                        val list = property.call(tasbeehData) as List<*>
-                        list.contains(tasbeehName)
-                    } else {
-                        false
-                    }
-                }
-            ) {
+            if (multiTasbeeh) {
                 Text(
                     text = tasbeehName,
                     modifier = Modifier
