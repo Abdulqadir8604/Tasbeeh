@@ -50,31 +50,19 @@ fun SetupNav(
     db.firestoreSettings = settings
 
     db.collection("tasbeehs786")
+        .document("tasbeehData")
         .get()
         .addOnSuccessListener { result ->
-            for (document in result) {
-                val data = document.data
-
-                val longTasbeehs = data["longTasbeehs"] as Map<*, *>
-                val shortNames = data["shortNames"] as List<*>
-                val hasSub = data["hasSub"] as Map<*, *>
-                val homeTasbeeh = data["homeTasbeeh"] as List<*>
-                val impNames = data["impNames"] as List<*>
-                val singleTasbeeh = data["singleTasbeeh"] as List<*>
-                val ahlebait = data["ahlebait"] as List<*>
-                val tasbeehTypes = data["tasbeehTypes"] as List<*>
-
-                tasbeehData = TasbeehData(
-                    longTasbeehs = longTasbeehs,
-                    shortNames = shortNames,
-                    hasSub = hasSub,
-                    homeTasbeeh = homeTasbeeh,
-                    impNames = impNames,
-                    singleTasbeeh = singleTasbeeh,
-                    ahlebait = ahlebait,
-                    tasbeehTypes = tasbeehTypes
-                )
-            }
+            tasbeehData = TasbeehData(
+                longTasbeehs = result.data?.get("longTasbeehs") as Map<*, *>,
+                shortNames = result.data?.get("shortNames") as List<*>,
+                hasSub = result.data?.get("hasSub") as Map<*, *>,
+                homeTasbeeh = result.data?.get("homeTasbeeh") as List<*>,
+                impNames = result.data?.get("impNames") as List<*>,
+                singleTasbeeh = result.data?.get("singleTasbeeh") as List<*>,
+                ahlebait = result.data?.get("ahlebait") as List<*>,
+                tasbeehTypes = result.data?.get("tasbeehTypes") as List<*>,
+            )
         }
         .addOnFailureListener { exception ->
             Log.w("FIRESTORE", "Error getting documents.", exception)
@@ -108,6 +96,7 @@ fun SetupNav(
             TasbeehScreen(
                 tasbeehName = backStackEntry.arguments?.getString("tasbeehName") ?: "",
                 navController = navController,
+                tasbeehData = tasbeehData
             )
         }
     }

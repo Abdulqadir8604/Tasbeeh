@@ -1,7 +1,6 @@
 package com.lamaq.tasbeeh.components
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -48,69 +47,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.google.firebase.firestore.FirebaseFirestoreSettings
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import com.lamaq.tasbeeh.ui.theme.DarkColorScheme
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun TasbeehCards(
     tasbeehName: String,
+    tasbeehData: TasbeehData,
     onItemClick: (String, Any?) -> Unit,
 ) {
 
-    val settings = FirebaseFirestoreSettings.Builder()
-        .setCacheSizeBytes(FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED)
-        .build()
-    val db = Firebase.firestore
-    db.firestoreSettings = settings
-
-    var TasbeehData by remember {
-        mutableStateOf(
-            TasbeehData(
-                longTasbeehs = longTasbeehs,
-                shortNames = shortNames,
-                hasSub = hasSub,
-                homeTasbeeh = homeTasbeeh,
-                impNames = impNames,
-                singleTasbeeh = singleTasbeeh,
-                ahlebait = ahlebait,
-                tasbeehTypes = tasbeehTypes
-            )
-        )
-    }
-
-    db.collection("tasbeehs786")
-        .get()
-        .addOnSuccessListener { result ->
-            for (document in result) {
-                val data = document.data
-
-                val longTasbeehs = data["longTasbeehs"] as Map<*, *>
-                val shortNames = data["shortNames"] as List<*>
-                val hasSub = data["hasSub"] as Map<*, *>
-                val homeTasbeeh = data["homeTasbeeh"] as List<*>
-                val impNames = data["impNames"] as List<*>
-                val singleTasbeeh = data["singleTasbeeh"] as List<*>
-                val ahlebait = data["ahlebait"] as List<*>
-                val tasbeehTypes = data["tasbeehTypes"] as List<*>
-
-                TasbeehData = TasbeehData(
-                    longTasbeehs = longTasbeehs,
-                    shortNames = shortNames,
-                    hasSub = hasSub,
-                    homeTasbeeh = homeTasbeeh,
-                    impNames = impNames,
-                    singleTasbeeh = singleTasbeeh,
-                    ahlebait = ahlebait,
-                    tasbeehTypes = tasbeehTypes
-                )
-            }
-        }
-        .addOnFailureListener { exception ->
-            Log.w("FIRESTORE", "Error getting documents.", exception)
-        }
     
     val context = LocalContext.current
     val sharedPref = context.getSharedPreferences(
@@ -151,14 +97,14 @@ fun TasbeehCards(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (
-                TasbeehData.hasSub.values.any {
+                tasbeehData.hasSub.values.any {
                     val property = TasbeehData::class.members
                         .firstOrNull { it.name == it.name }
                     if (
                         property != null &&
                         property.returnType.classifier == List::class
                     ) {
-                        val list = property.call(TasbeehData) as List<*>
+                        val list = property.call(tasbeehData) as List<*>
                         list.contains(tasbeehName)
                     } else {
                         false
@@ -174,7 +120,7 @@ fun TasbeehCards(
                     fontWeight = FontWeight.Light,
                     color = if (tasbeehName.matches(
                             Regex(
-                                TasbeehData.impNames.joinToString(
+                                tasbeehData.impNames.joinToString(
                                     separator = "|",
                                     prefix = "(",
                                     postfix = ")"

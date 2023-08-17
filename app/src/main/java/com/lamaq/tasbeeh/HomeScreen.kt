@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -85,8 +84,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationManagerCompat
 import androidx.navigation.NavController
-import com.google.firebase.firestore.FirebaseFirestoreSettings
-import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ConfigUpdate
 import com.google.firebase.remoteconfig.ConfigUpdateListener
@@ -113,49 +110,6 @@ fun HomeScreen(
     tasbeehData: TasbeehData
 ) {
 
-    val settings = FirebaseFirestoreSettings.Builder()
-        .setCacheSizeBytes(FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED)
-        .build()
-    val db = Firebase.firestore
-    db.firestoreSettings = settings
-
-    var TasbeehData by remember {
-        mutableStateOf(
-            tasbeehData
-        )
-    }
-
-    db.collection("tasbeehs786")
-        .get()
-        .addOnSuccessListener { result ->
-            for (document in result) {
-                val data = document.data
-
-                val longTasbeehs = data["longTasbeehs"] as Map<*, *>
-                val shortNames = data["shortNames"] as List<*>
-                val hasSub = data["hasSub"] as Map<*, *>
-                val homeTasbeeh = data["homeTasbeeh"] as List<*>
-                val impNames = data["impNames"] as List<*>
-                val singleTasbeeh = data["singleTasbeeh"] as List<*>
-                val ahlebait = data["ahlebait"] as List<*>
-                val tasbeehTypes = data["tasbeehTypes"] as List<*>
-
-                TasbeehData = TasbeehData(
-                    longTasbeehs = longTasbeehs,
-                    shortNames = shortNames,
-                    hasSub = hasSub,
-                    homeTasbeeh = homeTasbeeh,
-                    impNames = impNames,
-                    singleTasbeeh = singleTasbeeh,
-                    ahlebait = ahlebait,
-                    tasbeehTypes = tasbeehTypes
-                )
-            }
-        }
-        .addOnFailureListener { exception ->
-            Log.w("FIRESTORE", "Error getting documents.", exception)
-        }
-
     val context = LocalContext.current
 
     var visible by remember { mutableStateOf(false) }
@@ -181,8 +135,8 @@ fun HomeScreen(
     )
     val selectedItem = remember {
         mutableStateOf(
-            drawerPref.getString("drawer", TasbeehData.tasbeehTypes.elementAt(0).toString())
-                ?: TasbeehData.tasbeehTypes.elementAt(0).toString()
+            drawerPref.getString("drawer", tasbeehData.tasbeehTypes.elementAt(0).toString())
+                ?: tasbeehData.tasbeehTypes.elementAt(0).toString()
         )
     }
 
@@ -475,7 +429,7 @@ fun HomeScreen(
                                     }
                                 }
                                 Spacer(Modifier.height(12.dp))
-                                TasbeehData.tasbeehTypes.forEach { item ->
+                                tasbeehData.tasbeehTypes.forEach { item ->
                                     NavigationDrawerItem(
                                         selected = tasbeehName == item,
                                         modifier = Modifier
@@ -676,7 +630,7 @@ fun HomeScreen(
                                         )
                                     }
                                 }
-                                if (!TasbeehData.singleTasbeeh.contains(tasbeehName)) {
+                                if (!tasbeehData.singleTasbeeh.contains(tasbeehName)) {
                                     Box(
                                         modifier = Modifier
                                             .width(imageSize.dp)
@@ -719,7 +673,7 @@ fun HomeScreen(
 
                                 Spacer(modifier = Modifier.height(20.dp))
 
-                                if (TasbeehData.singleTasbeeh.contains(tasbeehName)) {
+                                if (tasbeehData.singleTasbeeh.contains(tasbeehName)) {
                                     AnimatedVisibility(
                                         visible = visible,
                                         enter = slideInVertically(
@@ -735,6 +689,7 @@ fun HomeScreen(
                                     ) {
                                         TasbeehCards(
                                             tasbeehName = tasbeehName.toString(),
+                                            tasbeehData = tasbeehData,
                                         ) { _, _ ->
                                             if (hasHaptics) haptic.performHapticFeedback(
                                                 HapticFeedbackType.LongPress
@@ -749,7 +704,7 @@ fun HomeScreen(
                                             )
                                         }
                                     }
-                                } else if (!TasbeehData.singleTasbeeh.contains(tasbeehName)
+                                } else if (!tasbeehData.singleTasbeeh.contains(tasbeehName)
                                 ) {
                                     AnimatedVisibility(
                                         visible = visible,
@@ -780,20 +735,21 @@ fun HomeScreen(
                                             columns = StaggeredGridCells.Adaptive(150.dp)
                                         ) {
                                             val selectedSubListKey =
-                                                TasbeehData.hasSub[tasbeehName.toString()] as String?
+                                                tasbeehData.hasSub[tasbeehName.toString()] as String?
                                             selectedSubListKey?.let { listName ->
-                                                val property = TasbeehData::class.members
+                                                val property = tasbeehData::class.members
                                                     .firstOrNull { it.name == listName }
                                                 if (
                                                     property != null &&
                                                     property.returnType.classifier == List::class
                                                 ) {
                                                     val selectedSubList =
-                                                        property.call(TasbeehData) as List<*>
+                                                        property.call(tasbeehData) as List<*>
                                                     selectedSubList.forEach { tasbeeh ->
                                                         items(1) {
                                                             TasbeehCards(
                                                                 tasbeehName = tasbeeh.toString(),
+                                                                tasbeehData = tasbeehData,
                                                             ) { _, _ ->
                                                                 if (hasHaptics) haptic.performHapticFeedback(
                                                                     HapticFeedbackType.LongPress
@@ -845,11 +801,11 @@ fun HomeScreen(
     }
 
     BackHandler {
-        if (tasbeehName == TasbeehData.homeTasbeeh.elementAt(0)) {
+        if (tasbeehName == tasbeehData.homeTasbeeh.elementAt(0)) {
             showExitDialog.value = true
         } else {
-            navController.navigate("home/${TasbeehData.homeTasbeeh.elementAt(0)}")
-            drawerPref.edit().putString("drawer", TasbeehData.homeTasbeeh.elementAt(0).toString()).apply()
+            navController.navigate("home/${tasbeehData.homeTasbeeh.elementAt(0)}")
+            drawerPref.edit().putString("drawer", tasbeehData.homeTasbeeh.elementAt(0).toString()).apply()
         }
     }
 }
