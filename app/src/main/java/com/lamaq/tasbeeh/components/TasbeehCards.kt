@@ -1,7 +1,6 @@
 package com.lamaq.tasbeeh.components
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -48,8 +47,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import com.lamaq.tasbeeh.ui.theme.DarkColorScheme
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -60,27 +57,12 @@ fun TasbeehCards(
     tasbeehData: TasbeehData,
     onItemClick: (String, Any?) -> Unit,
 ) {
-
-    val db = Firebase.firestore
-    val documentReference = db.document("tasbeehs786/$fieldName")
-    Log.d("FIRESTORE", "tasbeehs786/$fieldName")
+    var multiTasbeeh by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-    var multiTasbeeh by remember { mutableStateOf(false) }
-
-    documentReference.get().addOnSuccessListener { documentSnapshot ->
-        if (documentSnapshot.exists()) {
-            val fieldValue = documentSnapshot.get(fieldName)!! as List<*>
-            multiTasbeeh = tasbeehName in fieldValue
-            Log.d("FIRESTORE", "TasbeehCards: $fieldValue: $tasbeehName")
-        } else {
-            multiTasbeeh = false
-            Log.d("FIRESTORE", "TasbeehCards: error in finding $tasbeehName")
-        }
-    }.addOnFailureListener { e ->
-        Log.w("TasbeehCards", "Error getting documents.", e)
+    if (tasbeehData.hasSub.containsKey(fieldName)) {
+        multiTasbeeh = true
     }
-
 
     val sharedPref = context.getSharedPreferences(
         "tasbeehs",

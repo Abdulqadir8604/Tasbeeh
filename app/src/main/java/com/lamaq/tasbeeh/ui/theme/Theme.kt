@@ -71,7 +71,7 @@ fun TasbeehTheme(
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor =
-                DarkColorScheme.surface.toArgb()
+                Color.Transparent.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = if (darkTheme) darkTheme else !darkTheme
         }
     }

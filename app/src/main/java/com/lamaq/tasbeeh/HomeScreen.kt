@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -84,7 +83,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationManagerCompat
 import androidx.navigation.NavController
-import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ConfigUpdate
@@ -111,8 +109,6 @@ fun HomeScreen(
     navController: NavController,
     tasbeehData: TasbeehData
 ) {
-    val db = Firebase.firestore
-
     val context = LocalContext.current
 
     var visible by remember { mutableStateOf(false) }
@@ -151,6 +147,21 @@ fun HomeScreen(
     remoteConfig.setDefaultsAsync(R.xml.remote_config_defaults)
 
     val news by remember { mutableStateOf(remoteConfig.getString("news")) }
+
+    val db = Firebase.firestore
+    var multiTasbeehs by remember { mutableStateOf(listOf<String>()) }
+    if (tasbeehData.hasSub[tasbeehName] != null) {
+        db.document(
+            tasbeehData.hasSub[tasbeehName].toString()
+        )
+            .get()
+            .addOnSuccessListener { document ->
+                document.data?.forEach { (_, value) ->
+                    multiTasbeehs =
+                        value as List<String>
+                }
+            }
+    }
 
     val showExitDialog = remember { mutableStateOf(false) }
     var resetAllCounts by remember { mutableStateOf(false) }
@@ -396,7 +407,7 @@ fun HomeScreen(
                                 ) {
                                     IconButton(
                                         modifier = Modifier
-                                            .padding(top = 20.dp, start = 20.dp)
+                                            .padding(top = 10.dp, start = 20.dp)
                                             .align(Alignment.TopStart),
                                         onClick = {
                                             resetAllCounts = true
@@ -412,12 +423,12 @@ fun HomeScreen(
                                         style = MaterialTheme.typography.headlineMedium,
                                         color = DarkColorScheme.tertiary,
                                         modifier = Modifier
-                                            .padding(top = 20.dp)
+                                            .padding(top = 10.dp)
                                             .align(Alignment.TopCenter)
                                     )
                                     IconButton(
                                         modifier = Modifier
-                                            .padding(top = 20.dp, end = 40.dp)
+                                            .padding(top = 10.dp, end = 40.dp)
                                             .align(Alignment.TopEnd),
                                         onClick = {
                                             scope.launch {
@@ -468,7 +479,7 @@ fun HomeScreen(
                                             selectedItem.value = item.toString()
                                             drawerPref.edit().putString("drawer", item.toString())
                                                 .apply()
-                                            navController.navigate("home/$item") // Use the item directly
+                                            navController.navigate("home/$item")
                                         },
 
                                         colors = NavigationDrawerItemDefaults.colors(
@@ -504,7 +515,7 @@ fun HomeScreen(
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = DarkColorScheme.secondary,
                                             modifier = Modifier
-                                                .padding(bottom = 10.dp)
+                                                .padding(bottom = 10.dp, end = 20.dp)
                                         )
                                         Text(
                                             text = "v${
@@ -528,7 +539,7 @@ fun HomeScreen(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .padding(50.dp)
+                                    .padding(60.dp)
                                     .align(Alignment.TopEnd),
                             ) {
                                 DropdownMenu(
@@ -597,7 +608,7 @@ fun HomeScreen(
                                             }
                                         },
                                         modifier = Modifier
-                                            .padding(start = 20.dp, top = 20.dp)
+                                            .padding(start = 20.dp, top = 40.dp)
                                             .background(
                                                 DarkColorScheme.secondary,
                                                 MaterialTheme.shapes.extraLarge
@@ -611,18 +622,10 @@ fun HomeScreen(
                                             modifier = Modifier.size(30.dp)
                                         )
                                     }
-//                                    Text(
-//                                        text = "تسبيح",
-//                                        style = MaterialTheme.typography.headlineMedium,
-//                                        color = DarkColorScheme.tertiary,
-//                                        modifier = Modifier
-//                                            .padding(top = 20.dp)
-//                                            .align(Alignment.TopCenter)
-//                                    )
                                     IconButton(
                                         onClick = { showMenu = true },
                                         modifier = Modifier
-                                            .padding(end = 20.dp, top = 20.dp)
+                                            .padding(end = 20.dp, top = 40.dp)
                                             .align(Alignment.TopEnd)
                                     ) {
                                         Icon(
@@ -738,43 +741,20 @@ fun HomeScreen(
                                             state = rememberLazyStaggeredGridState(),
                                             columns = StaggeredGridCells.Adaptive(150.dp)
                                         ) {
-                                            val docRef =
-                                                tasbeehData.hasSub[tasbeehName.toString()] as DocumentReference
-                                            Log.d("FIRESTORE", "HomeScreen:  $tasbeehName")
-                                            Log.d("FIRESTORE", "HomeScreen:  $docRef")
-                                            docRef.get()
-                                                .addOnSuccessListener { documentSnapshot ->
-                                                    if (documentSnapshot.exists()) {
-                                                        val data = documentSnapshot.data
-                                                        (data?.get(tasbeehName.toString()) as List<*>?)?.forEach { tasbeeh ->
-                                                            items(1) {
-                                                                TasbeehCards(
-                                                                    tasbeehName = tasbeeh.toString(),
-                                                                    fieldName = tasbeehName.toString(),
-                                                                    tasbeehData = tasbeehData,
-                                                                ) { _, _ ->
-                                                                    if (hasHaptics) haptic.performHapticFeedback(
-                                                                        HapticFeedbackType.LongPress
-                                                                    )
-                                                                    visible = false
-                                                                    navController.navigate(
-                                                                        "tasbeeh/${tasbeeh}/${
-                                                                            sharedPref?.getInt(
-                                                                                tasbeeh.toString(),
-                                                                                0
-                                                                            )
-                                                                        }"
-                                                                    )
-                                                                }
-                                                            }
-                                                        }
-                                                    } else {
-                                                        // Handle the failure
-                                                    }
+                                            items(multiTasbeehs.size) { index ->
+                                                val item = multiTasbeehs[index]
+                                                TasbeehCards(
+                                                    tasbeehName = item,
+                                                    fieldName = tasbeehName.toString(),
+                                                    tasbeehData = tasbeehData,
+                                                ) { _, _ ->
+                                                    if (hasHaptics) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                    visible = false
+                                                    navController.navigate(
+                                                        "tasbeeh/${item}/${sharedPref?.getInt(item, 0)}"
+                                                    )
                                                 }
-                                                .addOnFailureListener {
-                                                    // Handle the failure
-                                                }
+                                            }
                                         }
                                     }
                                 } else {
