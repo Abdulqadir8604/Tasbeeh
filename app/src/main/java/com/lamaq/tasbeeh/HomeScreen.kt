@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
@@ -80,6 +81,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationManagerCompat
 import androidx.navigation.NavController
@@ -98,7 +100,17 @@ import com.lamaq.tasbeeh.ui.theme.DrawerScrimColor
 import com.lamaq.tasbeeh.ui.theme.LightColorScheme
 import com.lamaq.tasbeeh.ui.theme.TasbeehRippleTheme
 import com.lamaq.tasbeeh.ui.theme.TasbeehTheme
+import com.lamaq.tasbeeh.util.ApiService
+import com.lamaq.tasbeeh.util.Welcome
+import com.lamaq.tasbeeh.util.convertToArabicDigits
+import com.lamaq.tasbeeh.util.fullMonthName
+import com.lamaq.tasbeeh.util.getCurrentDate
 import kotlinx.coroutines.launch
+import retrofit2.Call
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import java.sql.Time
 import kotlin.system.exitProcess
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -174,6 +186,10 @@ fun HomeScreen(
 
     val notificationManager = NotificationManagerCompat.from(LocalContext.current)
     val areNotificationsEnabled = notificationManager.areNotificationsEnabled()
+
+    var dateString by remember { mutableStateOf("") }
+    var hDay by remember { mutableStateOf("") }
+    var hYear by remember { mutableStateOf("") }
 
     if (!askedForNotiPer) {
         if (!areNotificationsEnabled) {
@@ -272,6 +288,41 @@ fun HomeScreen(
             textContentColor = DarkColorScheme.secondary,
         )
     }
+
+
+    val retrofit = Retrofit.Builder()
+        .baseUrl("https://api.aladhan.com/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    val apiService = retrofit.create(ApiService::class.java)
+
+    val call = apiService.convertToHijri(getCurrentDate())
+    call.enqueue(object : retrofit2.Callback<Welcome> {
+        override fun onResponse(call: Call<Welcome>, response: Response<Welcome>) {
+            if (response.isSuccessful) {
+                val welcomeResponse = response.body()
+                val month = fullMonthName[welcomeResponse?.data?.hijri?.month?.number.toString()]
+                hDay = convertToArabicDigits(welcomeResponse?.data?.hijri?.day.toString())
+                val year = convertToArabicDigits(welcomeResponse?.data?.hijri?.year.toString())
+                val hijriDate =
+                    if (Time(System.currentTimeMillis()).hours > 19 || Time(System.currentTimeMillis()).hours < 6) {
+                        // meaning it is night
+                        "$hDay رات $month $year"
+                    } else {
+                        welcomeResponse?.data?.hijri?.day + " " + welcomeResponse?.data?.hijri?.month?.en + " " + welcomeResponse?.data?.hijri?.year
+                    }
+                dateString = hijriDate
+            } else {
+                println(response.errorBody())
+            }
+        }
+
+        override fun onFailure(call: Call<Welcome>, t: Throwable) {
+            dateString = "internet needed"
+        }
+    })
+
 
     TasbeehTheme {
 
@@ -400,7 +451,7 @@ fun HomeScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .fillMaxHeight()
-                                    .padding(start = 0.dp, end = 30.dp),
+                                    .padding(start = 0.dp, end = 40.dp),
                             ) {
                                 Box(
                                     modifier = Modifier.fillMaxWidth()
@@ -443,63 +494,100 @@ fun HomeScreen(
                                     }
                                 }
                                 Spacer(Modifier.height(12.dp))
-                                tasbeehData.tasbeehTypes.forEach { item ->
-                                    NavigationDrawerItem(
-                                        selected = tasbeehName == item,
-                                        modifier = Modifier
-                                            .padding(
-                                                start = 0.dp,
-                                                end = 30.dp,
-                                                top = 10.dp,
-                                                bottom = 10.dp
-                                            )
-                                            .fillMaxWidth(),
-                                        icon = {
-                                            Icon(
-                                                imageVector = if (tasbeehName == item) {
-                                                    Icons.Filled.PlayArrow
-                                                } else {
-                                                    Icons.Outlined.PlayArrow
+                                Text(
+                                    text = dateString,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = DarkColorScheme.primary,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 20.dp)
+                                        .background(
+                                            DarkColorScheme.secondary,
+                                        ),
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(Modifier.height(12.dp))
+                                LazyColumn(
+                                    modifier = Modifier
+                                        .fillMaxSize(),
+                                    verticalArrangement = Arrangement.Top,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ){
+                                    items(1) {
+                                        tasbeehData.tasbeehTypes.forEach { item ->
+                                            NavigationDrawerItem(
+                                                selected = tasbeehName == item,
+                                                modifier = Modifier
+                                                    .padding(
+                                                        start = 0.dp,
+                                                        end = 30.dp,
+                                                        top = 10.dp,
+                                                        bottom = 10.dp
+                                                    )
+                                                    .fillMaxWidth(),
+                                                icon = {
+                                                    Icon(
+                                                        imageVector = if (tasbeehName == item) {
+                                                            Icons.Filled.PlayArrow
+                                                        } else {
+                                                            Icons.Outlined.PlayArrow
+                                                        },
+                                                        contentDescription = "icon",
+                                                        tint = DarkColorScheme.secondary
+                                                    )
                                                 },
-                                                contentDescription = "icon",
-                                                tint = DarkColorScheme.secondary
+                                                label = {
+                                                    Text(
+                                                        text = item.toString(),
+                                                        style = MaterialTheme.typography.headlineSmall,
+                                                        color = DarkColorScheme.secondary
+                                                    )
+                                                },
+                                                onClick = {
+                                                    scope.launch {
+                                                        drawerState.close()
+                                                    }
+                                                    selectedItem.value = item.toString()
+                                                    drawerPref.edit()
+                                                        .putString("drawer", item.toString())
+                                                        .apply()
+                                                    navController.navigate("home/$item")
+                                                },
+
+                                                colors = NavigationDrawerItemDefaults.colors(
+                                                    selectedTextColor = DarkColorScheme.secondary,
+                                                    unselectedTextColor = DarkColorScheme.secondary,
+                                                    selectedContainerColor = DarkColorScheme.primary,
+                                                    unselectedContainerColor = DarkColorScheme.surface,
+                                                    selectedIconColor = DarkColorScheme.secondary,
+                                                    unselectedIconColor = DarkColorScheme.secondary,
+                                                ),
+
+                                                badge = {
+                                                    if (tasbeehData.singleTasbeeh.contains(item)) {
+                                                        val count =
+                                                            sharedPref?.getInt(item.toString(), 0)
+                                                        if (count != null) {
+                                                            if (count > 0) {
+                                                                Text(
+                                                                    text = count.toString(),
+                                                                    style = MaterialTheme.typography.bodyMedium,
+                                                                    color = DarkColorScheme.secondary
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                },
+
+                                                shape = RoundedCornerShape(
+                                                    topStart = 0.dp,
+                                                    topEnd = 30.dp,
+                                                    bottomStart = 0.dp,
+                                                    bottomEnd = 30.dp
+                                                ),
                                             )
-                                        },
-                                        label = {
-                                            Text(
-                                                text = item.toString(),
-                                                style = MaterialTheme.typography.bodyLarge,
-                                                color = DarkColorScheme.secondary
-                                            )
-                                        },
-                                        onClick = {
-                                            scope.launch {
-                                                drawerState.close()
-                                            }
-                                            selectedItem.value = item.toString()
-                                            drawerPref.edit().putString("drawer", item.toString())
-                                                .apply()
-                                            navController.navigate("home/$item")
-                                        },
-
-                                        colors = NavigationDrawerItemDefaults.colors(
-                                            selectedTextColor = DarkColorScheme.secondary,
-                                            unselectedTextColor = DarkColorScheme.secondary,
-                                            selectedContainerColor = DarkColorScheme.primary,
-                                            unselectedContainerColor = DarkColorScheme.surface,
-                                            selectedIconColor = DarkColorScheme.secondary,
-                                            unselectedIconColor = DarkColorScheme.secondary,
-                                        ),
-
-                                        badge = {},
-
-                                        shape = RoundedCornerShape(
-                                            topStart = 0.dp,
-                                            topEnd = 30.dp,
-                                            bottomStart = 0.dp,
-                                            bottomEnd = 30.dp
-                                        ),
-                                    )
+                                        }
+                                    }
                                 }
                                 Box(
                                     modifier = Modifier.fillMaxSize()

@@ -12,8 +12,8 @@ android {
         applicationId = "com.lamaq.tasbeeh"
         minSdk = 28
         targetSdk = 34
-        versionCode = 3
-        versionName = "2.2"
+        versionCode = 4
+        versionName = "2.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -69,6 +69,9 @@ dependencies {
     implementation ("com.google.firebase:firebase-inappmessaging-display-ktx:20.3.3")
     implementation("com.google.firebase:firebase-analytics-ktx:21.3.0")
     implementation("com.google.firebase:firebase-firestore-ktx:24.7.0")
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
     implementation("com.google.accompanist:accompanist-permissions:0.30.1")
 
