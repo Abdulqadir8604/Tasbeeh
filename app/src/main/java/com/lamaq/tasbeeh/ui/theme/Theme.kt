@@ -73,6 +73,7 @@ fun TasbeehTheme(
             window.statusBarColor =
                 Color.Transparent.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = if (darkTheme) darkTheme else !darkTheme
+            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = if (darkTheme) darkTheme else !darkTheme
         }
     }
 

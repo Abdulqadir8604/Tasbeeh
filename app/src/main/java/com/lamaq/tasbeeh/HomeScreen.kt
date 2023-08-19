@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
@@ -38,6 +39,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Refresh
@@ -303,14 +305,14 @@ fun HomeScreen(
             if (response.isSuccessful) {
                 val welcomeResponse = response.body()
                 val month = fullMonthName[welcomeResponse?.data?.hijri?.month?.number.toString()]
-                hDay = convertToArabicDigits(welcomeResponse?.data?.hijri?.day.toString())
+                val day = convertToArabicDigits(welcomeResponse?.data?.hijri?.day?.toInt()?.plus(1).toString())
                 val year = convertToArabicDigits(welcomeResponse?.data?.hijri?.year.toString())
                 val hijriDate =
                     if (Time(System.currentTimeMillis()).hours > 19 || Time(System.currentTimeMillis()).hours < 6) {
                         // meaning it is night
-                        "$hDay رات $month $year"
+                        "$day رات $month $year"
                     } else {
-                        welcomeResponse?.data?.hijri?.day + " " + welcomeResponse?.data?.hijri?.month?.en + " " + welcomeResponse?.data?.hijri?.year
+                        "$day $month $year"
                     }
                 dateString = hijriDate
             } else {
@@ -576,6 +578,12 @@ fun HomeScreen(
                                                                 )
                                                             }
                                                         }
+                                                    } else {
+                                                        Icon(
+                                                            imageVector = Icons.Outlined.MoreVert,
+                                                            tint = DarkColorScheme.secondary,
+                                                            contentDescription = "More Tasbeehs"
+                                                        )
                                                     }
                                                 },
 
@@ -589,6 +597,7 @@ fun HomeScreen(
                                         }
                                     }
                                 }
+                                Spacer(Modifier.height(12.dp))
                                 Box(
                                     modifier = Modifier.fillMaxSize()
                                 ) {
@@ -598,13 +607,6 @@ fun HomeScreen(
                                         verticalArrangement = Arrangement.Bottom,
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
-                                        Text(
-                                            text = "Developed by: Abdulqadir Bhinderwala",
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = DarkColorScheme.secondary,
-                                            modifier = Modifier
-                                                .padding(bottom = 10.dp, end = 20.dp)
-                                        )
                                         Text(
                                             text = "v${
                                                 LocalContext.current.packageManager.getPackageInfo(
@@ -732,6 +734,12 @@ fun HomeScreen(
                                             .align(Alignment.CenterHorizontally)
                                             .padding(top = 8.dp, bottom = 20.dp)
                                             .background(Color.Transparent)
+                                            .animateContentSize(
+                                                animationSpec = tween(
+                                                    durationMillis = 1000,
+                                                    easing = FastOutSlowInEasing
+                                                )
+                                            )
                                     ) {
                                         Image(
                                             painter = painterResource(id = R.drawable.ashara),
@@ -739,6 +747,7 @@ fun HomeScreen(
                                             modifier = Modifier
                                                 .fillMaxSize()
                                                 .padding(20.dp)
+                                                .animateContentSize()
                                         )
                                     }
                                 } else {

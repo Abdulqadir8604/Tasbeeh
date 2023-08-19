@@ -826,7 +826,7 @@ fun TasbeehScreen(
                         }
                         Dialog(
                             onDismissRequest = {
-                                showEditDialog = false
+                                showLimitDialog = false
                             }
                         ) {
                             Column(
@@ -843,7 +843,7 @@ fun TasbeehScreen(
                                     },
                                     label = {
                                         Text(
-                                            "Edit Limit",
+                                            "Set Limit",
                                             style = MaterialTheme.typography.bodyLarge,
                                             color = DarkColorScheme.inversePrimary
                                         )
@@ -876,7 +876,7 @@ fun TasbeehScreen(
                                     IconButton(
                                         onClick = {
                                             showLimitDialog = false
-                                            limit = if (editableCounter.isNotEmpty()) {
+                                            limit = if (editableCounter.isNotEmpty() && editableCounter.toInt() > 0) {
                                                 editableCounter.toInt()
                                             } else {
                                                 defaultLimit

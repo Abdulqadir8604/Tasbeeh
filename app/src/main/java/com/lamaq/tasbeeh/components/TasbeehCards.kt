@@ -1,6 +1,7 @@
 package com.lamaq.tasbeeh.components
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -119,12 +120,18 @@ fun TasbeehCards(
                             )
                         )
                     ) DarkColorScheme.tertiary else DarkColorScheme.secondary,
-                    fontSize = MaterialTheme.typography.headlineMedium.fontSize
+                    fontSize = MaterialTheme.typography.headlineMedium.fontSize,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Box(
                     modifier = Modifier.combinedClickable(
-                        onClick = {},
+                        onClick = {
+                                  Toast.makeText(
+                                      context,
+                                      "Long Click to Edit Total Count",
+                                      Toast.LENGTH_SHORT
+                                  ).show()
+                        },
                         onLongClick = {
                             showEditDialog = true
                         }
@@ -176,7 +183,13 @@ fun TasbeehCards(
                 Spacer(modifier = Modifier.height(8.dp))
                 Box(
                     modifier = Modifier.combinedClickable(
-                        onClick = {},
+                        onClick = {
+                            Toast.makeText(
+                                context,
+                                "Long Click to Edit Total Count",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        },
                         onLongClick = {
                             showEditDialog = true
                         }
