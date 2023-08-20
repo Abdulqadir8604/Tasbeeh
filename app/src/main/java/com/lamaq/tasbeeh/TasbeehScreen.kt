@@ -156,34 +156,36 @@ fun TasbeehScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    
+    var colorScheme = if (isSystemInDarkTheme()) DarkColorScheme else LightColorScheme
 
     TasbeehTheme {
         Surface(
             modifier = Modifier
                 .fillMaxSize()
                 .wrapContentSize(),
-            color = DarkColorScheme.surface,
+            color = colorScheme.surface,
         ) {
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
-                containerColor = if (isSystemInDarkTheme()) DarkColorScheme.background else LightColorScheme.background,
+                containerColor = colorScheme.background,
                 snackbarHost = {
                     SnackbarHost(snackbarHostState) { data ->
                         val buttonColor = ButtonDefaults.textButtonColors(
-                            contentColor = DarkColorScheme.secondary
+                            contentColor = colorScheme.secondary
                         )
                         Snackbar(
                             modifier = Modifier
                                 .padding(12.dp)
                                 .border(
                                     2.dp,
-                                    DarkColorScheme.secondary,
+                                    colorScheme.secondary,
                                     MaterialTheme.shapes.large
                                 ),
-                            containerColor = DarkColorScheme.primary,
+                            containerColor = colorScheme.primary,
                             shape = MaterialTheme.shapes.large,
-                            actionContentColor = DarkColorScheme.inversePrimary,
-                            contentColor = DarkColorScheme.secondary,
+                            actionContentColor = colorScheme.inversePrimary,
+                            contentColor = colorScheme.secondary,
                             action = {
                                 TextButton(
                                     onClick = {
@@ -209,7 +211,7 @@ fun TasbeehScreen(
                             .padding(60.dp)
                             .align(Alignment.TopEnd)
                             .background(
-                                color = DarkColorScheme.primary,
+                                color = colorScheme.primary,
                                 shape = MaterialTheme.shapes.medium
                             )
                     ) {
@@ -219,7 +221,7 @@ fun TasbeehScreen(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
                                 .background(
-                                    DarkColorScheme.primary,
+                                    colorScheme.primary,
                                 )
                         ) {
                             DropdownMenuItem(
@@ -233,7 +235,7 @@ fun TasbeehScreen(
                                             text = "Sound",
                                             style = MaterialTheme.typography.bodyMedium,
                                             modifier = Modifier.padding(end = 10.dp),
-                                            color = DarkColorScheme.secondary,
+                                            color = colorScheme.secondary,
                                         )
                                         Switch(
                                             checked = hasSound,
@@ -248,10 +250,10 @@ fun TasbeehScreen(
                                                 .padding(start = 10.dp)
                                                 .height(20.dp),
                                             colors = SwitchDefaults.colors(
-                                                checkedThumbColor = DarkColorScheme.primary,
-                                                uncheckedThumbColor = DarkColorScheme.secondary,
-                                                uncheckedTrackColor = DarkColorScheme.primary,
-                                                checkedTrackColor = DarkColorScheme.secondary
+                                                checkedThumbColor = colorScheme.primary,
+                                                uncheckedThumbColor = colorScheme.secondary,
+                                                uncheckedTrackColor = colorScheme.primary,
+                                                checkedTrackColor = colorScheme.secondary
                                             ),
                                         )
                                     }
@@ -272,7 +274,7 @@ fun TasbeehScreen(
                                             text = "Vibrate",
                                             style = MaterialTheme.typography.bodyMedium,
                                             modifier = Modifier.padding(end = 10.dp),
-                                            color = DarkColorScheme.secondary,
+                                            color = colorScheme.secondary,
                                         )
                                         Switch(
                                             checked = hasHaptics,
@@ -287,10 +289,10 @@ fun TasbeehScreen(
                                                 .padding(start = 10.dp)
                                                 .height(20.dp),
                                             colors = SwitchDefaults.colors(
-                                                checkedThumbColor = DarkColorScheme.primary,
-                                                uncheckedThumbColor = DarkColorScheme.secondary,
-                                                uncheckedTrackColor = DarkColorScheme.primary,
-                                                checkedTrackColor = DarkColorScheme.secondary
+                                                checkedThumbColor = colorScheme.primary,
+                                                uncheckedThumbColor = colorScheme.secondary,
+                                                uncheckedTrackColor = colorScheme.primary,
+                                                checkedTrackColor = colorScheme.secondary
                                             ),
                                         )
                                     }
@@ -338,14 +340,14 @@ fun TasbeehScreen(
                                         .padding(start = 20.dp, top = 40.dp)
                                         .align(Alignment.TopStart)
                                         .background(
-                                            DarkColorScheme.secondary,
+                                            colorScheme.secondary,
                                             shape = MaterialTheme.shapes.extraLarge
                                         )
                                 ) {
                                     Icon(
                                         imageVector = Icons.Outlined.KeyboardArrowLeft,
                                         contentDescription = "Back",
-                                        tint = DarkColorScheme.primary,
+                                        tint = colorScheme.primary,
                                     )
                                 }
                                 IconButton(
@@ -358,7 +360,7 @@ fun TasbeehScreen(
                                         imageVector = Icons.Outlined.Settings,
                                         modifier = Modifier.size(30.dp),
                                         contentDescription = "Settings",
-                                        tint = DarkColorScheme.secondary,
+                                        tint = colorScheme.secondary,
                                     )
                                 }
                             }
@@ -455,11 +457,11 @@ fun TasbeehScreen(
                                                     }
                                                 },
                                             ),
-                                    color = DarkColorScheme.secondary,
+                                    color = colorScheme.secondary,
                                     textAlign = TextAlign.Center,
                                 )
                                 val textSizeStyle = TextStyle(
-                                    color = DarkColorScheme.secondary,
+                                    color = colorScheme.secondary,
                                     fontSize = 60.sp,
                                     lineHeight = 48.sp,
                                     textAlign = TextAlign.Center,
@@ -476,20 +478,20 @@ fun TasbeehScreen(
                                             .padding(top = 40.dp, bottom = 8.dp)
                                             .fillMaxWidth(1f)
                                     },
-                                    color = DarkColorScheme.secondary,
+                                    color = colorScheme.secondary,
                                     style = textSizeStyle,
                                     maxLines = 1,
                                 )
                                 Text(
                                     text = "+",
-                                    color = DarkColorScheme.secondary,
+                                    color = colorScheme.secondary,
                                     style = MaterialTheme.typography.bodyLarge,
                                     maxLines = 1,
                                 )
                                 Text(
                                     text = "$totalCounter",
                                     modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
-                                    color = DarkColorScheme.secondary,
+                                    color = colorScheme.secondary,
                                     style = MaterialTheme.typography.bodyLarge,
                                     maxLines = 1,
                                 )
@@ -501,7 +503,7 @@ fun TasbeehScreen(
                                             "∞"
                                     }",
                                     modifier = Modifier.padding(top = 16.dp, bottom = 10.dp),
-                                    color = DarkColorScheme.tertiary,
+                                    color = colorScheme.tertiary,
                                     style = MaterialTheme.typography.bodyMedium,
                                     maxLines = 1,
                                 )
@@ -538,7 +540,7 @@ fun TasbeehScreen(
                                 modifier = Modifier
                                     .padding(16.dp)
                                     .background(
-                                        color = DarkColorScheme.primaryContainer,
+                                        color = colorScheme.primaryContainer,
                                         shape = MaterialTheme.shapes.extraLarge
                                     )
                                     .clickable(
@@ -610,7 +612,7 @@ fun TasbeehScreen(
                                         text = "+1",
                                         modifier = Modifier.padding(top = 65.dp),
                                         style = MaterialTheme.typography.headlineLarge,
-                                        color = DarkColorScheme.onPrimaryContainer,
+                                        color = colorScheme.onPrimaryContainer,
                                     )
                                 }
                                 Row(
@@ -634,7 +636,7 @@ fun TasbeehScreen(
                                         modifier = Modifier
                                             .padding(10.dp)
                                             .background(
-                                                color = DarkColorScheme.secondary,
+                                                color = colorScheme.secondary,
                                                 shape = MaterialTheme.shapes.extraLarge
                                             )
                                             .size(50.dp)
@@ -642,7 +644,7 @@ fun TasbeehScreen(
                                         Icon(
                                             imageVector = ImageVector.vectorResource(id = R.drawable.neg1),
                                             contentDescription = "-1",
-                                            tint = DarkColorScheme.primary,
+                                            tint = colorScheme.primary,
                                             modifier = Modifier.size(30.dp)
                                         )
                                     }
@@ -653,7 +655,7 @@ fun TasbeehScreen(
                                         modifier = Modifier
                                             .padding(10.dp)
                                             .background(
-                                                color = DarkColorScheme.secondary,
+                                                color = colorScheme.secondary,
                                                 shape = MaterialTheme.shapes.extraLarge
                                             )
                                             .size(50.dp)
@@ -661,7 +663,7 @@ fun TasbeehScreen(
                                         Icon(
                                             imageVector = Icons.Outlined.Refresh,
                                             contentDescription = "Reset",
-                                            tint = DarkColorScheme.primary,
+                                            tint = colorScheme.primary,
                                             modifier = Modifier
                                                 .size(30.dp)
                                                 .combinedClickable(
@@ -686,7 +688,7 @@ fun TasbeehScreen(
                                         modifier = Modifier
                                             .padding(10.dp)
                                             .background(
-                                                color = DarkColorScheme.secondary,
+                                                color = colorScheme.secondary,
                                                 shape = MaterialTheme.shapes.extraLarge
                                             )
                                             .size(50.dp)
@@ -694,7 +696,7 @@ fun TasbeehScreen(
                                         Icon(
                                             imageVector = Icons.Outlined.Edit,
                                             contentDescription = "Edit",
-                                            tint = DarkColorScheme.primary,
+                                            tint = colorScheme.primary,
                                             modifier = Modifier.size(30.dp)
                                         )
                                     }
@@ -702,14 +704,14 @@ fun TasbeehScreen(
                                         modifier = Modifier
                                             .padding(10.dp)
                                             .background(
-                                                color = DarkColorScheme.secondary,
+                                                color = colorScheme.secondary,
                                                 shape = MaterialTheme.shapes.extraLarge
                                             )
                                             .size(50.dp)
                                     ) {
                                         Text(
                                             text = "Limit",
-                                            color = DarkColorScheme.primary,
+                                            color = colorScheme.primary,
                                             modifier = Modifier
                                                 .padding(5.dp)
                                                 .align(Alignment.Center)
@@ -747,7 +749,7 @@ fun TasbeehScreen(
                                         Text(
                                             "Edit Count",
                                             style = MaterialTheme.typography.bodyLarge,
-                                            color = DarkColorScheme.inversePrimary
+                                            color = colorScheme.inversePrimary
                                         )
                                     },
                                     modifier = Modifier
@@ -760,11 +762,11 @@ fun TasbeehScreen(
                                     textStyle = MaterialTheme.typography.headlineLarge,
 
                                     colors = TextFieldDefaults.textFieldColors(
-                                        containerColor = DarkColorScheme.background,
-                                        focusedIndicatorColor = DarkColorScheme.background,
-                                        unfocusedIndicatorColor = DarkColorScheme.background,
-                                        cursorColor = DarkColorScheme.secondary,
-                                        textColor = DarkColorScheme.secondary,
+                                        containerColor = colorScheme.background,
+                                        focusedIndicatorColor = colorScheme.background,
+                                        unfocusedIndicatorColor = colorScheme.background,
+                                        cursorColor = colorScheme.secondary,
+                                        textColor = colorScheme.secondary,
                                     ),
                                     maxLines = 1,
                                     singleLine = true,
@@ -794,7 +796,7 @@ fun TasbeehScreen(
                                         Icon(
                                             imageVector = Icons.Outlined.Done,
                                             contentDescription = "Done",
-                                            tint = DarkColorScheme.primary,
+                                            tint = colorScheme.primary,
                                             modifier = Modifier.size(50.dp)
                                         )
                                     }
@@ -812,7 +814,7 @@ fun TasbeehScreen(
                                         Icon(
                                             imageVector = Icons.Outlined.Close,
                                             contentDescription = "Close",
-                                            tint = DarkColorScheme.tertiary,
+                                            tint = colorScheme.tertiary,
                                             modifier = Modifier.size(50.dp)
                                         )
                                     }
@@ -845,7 +847,7 @@ fun TasbeehScreen(
                                         Text(
                                             "Set Limit",
                                             style = MaterialTheme.typography.bodyLarge,
-                                            color = DarkColorScheme.inversePrimary
+                                            color = colorScheme.inversePrimary
                                         )
                                     },
                                     modifier = Modifier
@@ -858,11 +860,11 @@ fun TasbeehScreen(
                                     textStyle = MaterialTheme.typography.headlineLarge,
 
                                     colors = TextFieldDefaults.textFieldColors(
-                                        containerColor = DarkColorScheme.background,
-                                        focusedIndicatorColor = DarkColorScheme.background,
-                                        unfocusedIndicatorColor = DarkColorScheme.background,
-                                        cursorColor = DarkColorScheme.secondary,
-                                        textColor = DarkColorScheme.secondary,
+                                        containerColor = colorScheme.background,
+                                        focusedIndicatorColor = colorScheme.background,
+                                        unfocusedIndicatorColor = colorScheme.background,
+                                        cursorColor = colorScheme.secondary,
+                                        textColor = colorScheme.secondary,
                                     ),
                                     maxLines = 1,
                                     singleLine = true,
@@ -892,7 +894,7 @@ fun TasbeehScreen(
                                         Icon(
                                             imageVector = Icons.Outlined.Done,
                                             contentDescription = "Done",
-                                            tint = DarkColorScheme.primary,
+                                            tint = colorScheme.primary,
                                             modifier = Modifier.size(50.dp)
                                         )
                                     }
@@ -910,7 +912,7 @@ fun TasbeehScreen(
                                         Icon(
                                             imageVector = Icons.Outlined.Close,
                                             contentDescription = "Close",
-                                            tint = DarkColorScheme.tertiary,
+                                            tint = colorScheme.tertiary,
                                             modifier = Modifier.size(50.dp)
                                         )
                                     }

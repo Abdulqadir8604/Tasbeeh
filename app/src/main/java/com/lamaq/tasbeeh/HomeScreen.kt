@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -37,9 +38,9 @@ import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridS
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Refresh
@@ -80,10 +81,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationManagerCompat
 import androidx.navigation.NavController
@@ -115,7 +119,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.sql.Time
 import kotlin.system.exitProcess
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @SuppressLint("UnnecessaryComposedModifier", "UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(
@@ -198,6 +202,8 @@ fun HomeScreen(
             showNotifAlert = true
         }
     }
+    
+    val colorScheme = if (isSystemInDarkTheme()) DarkColorScheme else LightColorScheme
 
     if (showNotifAlert) {
         settingsPref.edit().putBoolean("askedForNotiPer", true).apply()
@@ -215,7 +221,7 @@ fun HomeScreen(
                         context.startActivity(intent)
                     }
                 ) {
-                    Text("Enable", color = DarkColorScheme.inversePrimary)
+                    Text("Enable", color = colorScheme.inversePrimary)
                 }
             },
             dismissButton = {
@@ -225,26 +231,26 @@ fun HomeScreen(
                         showRationalAlertforNotif = true
                     }
                 ) {
-                    Text("Dismiss", color = DarkColorScheme.inversePrimary)
+                    Text("Dismiss", color = colorScheme.inversePrimary)
                 }
             },
-            containerColor = DarkColorScheme.background,
+            containerColor = colorScheme.background,
             icon = {
                 Icon(
                     imageVector = Icons.Outlined.Notifications,
                     contentDescription = "notifications",
-                    tint = DarkColorScheme.inversePrimary,
+                    tint = colorScheme.inversePrimary,
                     modifier = Modifier.size(30.dp)
                 )
             },
             title = {
                 Text(text = "Enable Notifications")
             },
-            titleContentColor = DarkColorScheme.secondary,
+            titleContentColor = colorScheme.secondary,
             text = {
                 Text(text = "Please enable notifications to receive updates. We promise not to spam you :)")
             },
-            textContentColor = DarkColorScheme.secondary,
+            textContentColor = colorScheme.secondary,
         )
     }
 
@@ -259,7 +265,7 @@ fun HomeScreen(
                         showRationalAlertforNotif = false
                     }
                 ) {
-                    Text("Okay", color = DarkColorScheme.inversePrimary)
+                    Text("Okay", color = colorScheme.inversePrimary)
                 }
             },
             dismissButton = {
@@ -268,29 +274,39 @@ fun HomeScreen(
                         showRationalAlertforNotif = false
                     }
                 ) {
-                    Text("Dismiss", color = DarkColorScheme.inversePrimary)
+                    Text("Dismiss", color = colorScheme.inversePrimary)
                 }
             },
-            containerColor = DarkColorScheme.background,
+            containerColor = colorScheme.background,
             icon = {
                 Icon(
                     imageVector = Icons.Outlined.Notifications,
                     contentDescription = "notifications",
-                    tint = DarkColorScheme.inversePrimary,
+                    tint = colorScheme.inversePrimary,
                     modifier = Modifier.size(30.dp)
                 )
             },
             title = {
                 Text(text = "Enable Notifications through device settings on your own whenever you want")
             },
-            titleContentColor = DarkColorScheme.secondary,
+            titleContentColor = colorScheme.secondary,
             text = {
                 Text(text = "Notifications are required to receive important updates and announcements!!")
             },
-            textContentColor = DarkColorScheme.secondary,
+            textContentColor = colorScheme.secondary,
         )
     }
 
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+                if (consumed.y != 0f) {
+                    imageSize = imageSize.coerceIn(200, 300)
+                }
+                return super.onPostFling(consumed, available)
+            }
+        }
+    }
 
     val retrofit = Retrofit.Builder()
         .baseUrl("https://api.aladhan.com/")
@@ -305,11 +321,14 @@ fun HomeScreen(
             if (response.isSuccessful) {
                 val welcomeResponse = response.body()
                 val month = fullMonthName[welcomeResponse?.data?.hijri?.month?.number.toString()]
-                val day = convertToArabicDigits(welcomeResponse?.data?.hijri?.day?.toInt()?.plus(1).toString())
+                var day = convertToArabicDigits(welcomeResponse?.data?.hijri?.day.toString())
                 val year = convertToArabicDigits(welcomeResponse?.data?.hijri?.year.toString())
                 val hijriDate =
-                    if (Time(System.currentTimeMillis()).hours > 19 || Time(System.currentTimeMillis()).hours < 6) {
+                    if (Time(System.currentTimeMillis()).hours >= 19 || Time(System.currentTimeMillis()).hours <= 5) {
                         // meaning it is night
+                        day = convertToArabicDigits(
+                            welcomeResponse?.data?.hijri?.day?.toInt()?.plus(1).toString()
+                        )
                         "$day رات $month $year"
                     } else {
                         "$day $month $year"
@@ -324,7 +343,6 @@ fun HomeScreen(
             dateString = "internet needed"
         }
     })
-
 
     TasbeehTheme {
 
@@ -348,23 +366,23 @@ fun HomeScreen(
                 onDismissRequest = {
                     showExitDialog.value = false
                 },
-                containerColor = DarkColorScheme.background,
+                containerColor = colorScheme.background,
                 icon = {
                     Icon(
                         imageVector = Icons.Outlined.Warning,
                         contentDescription = "Reset all counts",
-                        tint = DarkColorScheme.tertiary,
+                        tint = colorScheme.tertiary,
                         modifier = Modifier.size(30.dp)
                     )
                 },
                 title = {
                     Text(text = "Reset All Counts?")
                 },
-                titleContentColor = DarkColorScheme.secondary,
+                titleContentColor = colorScheme.secondary,
                 text = {
                     Text(text = "This will lose all your counts without any backup. Are you sure?")
                 },
-                textContentColor = DarkColorScheme.secondary,
+                textContentColor = colorScheme.secondary,
                 confirmButton = {
                     TextButton(
                         onClick = {
@@ -372,7 +390,7 @@ fun HomeScreen(
                             resetAllCounts = false
                         }
                     ) {
-                        Text("Reset All", color = DarkColorScheme.tertiary)
+                        Text("Reset All", color = colorScheme.tertiary)
                     }
                 },
                 dismissButton = {
@@ -381,7 +399,7 @@ fun HomeScreen(
                             resetAllCounts = false
                         }
                     ) {
-                        Text("Noooo!!", color = DarkColorScheme.inversePrimary)
+                        Text("Noooo!!", color = colorScheme.inversePrimary)
                     }
                 }
             )
@@ -392,15 +410,15 @@ fun HomeScreen(
                 onDismissRequest = {
                     showExitDialog.value = false
                 },
-                containerColor = DarkColorScheme.background,
+                containerColor = colorScheme.background,
                 title = {
                     Text(text = "Exit?")
                 },
-                titleContentColor = DarkColorScheme.secondary,
+                titleContentColor = colorScheme.secondary,
                 text = {
                     Text(text = "Are you sure you want to exit?")
                 },
-                textContentColor = DarkColorScheme.secondary,
+                textContentColor = colorScheme.secondary,
                 confirmButton = {
                     TextButton(
                         onClick = {
@@ -409,7 +427,7 @@ fun HomeScreen(
                             exitProcess(0)
                         }
                     ) {
-                        Text("Confirm", color = DarkColorScheme.inversePrimary)
+                        Text("Confirm", color = colorScheme.inversePrimary)
                     }
                 },
                 dismissButton = {
@@ -418,7 +436,7 @@ fun HomeScreen(
                             showExitDialog.value = false
                         }
                     ) {
-                        Text("Dismiss", color = DarkColorScheme.inversePrimary)
+                        Text("Dismiss", color = colorScheme.inversePrimary)
                     }
                 }
             )
@@ -428,12 +446,12 @@ fun HomeScreen(
             LocalRippleTheme provides TasbeehRippleTheme,
         ) {
             Surface(
-                color = if (isSystemInDarkTheme()) DarkColorScheme.surface else LightColorScheme.surface,
+                color = if (isSystemInDarkTheme()) colorScheme.surface else LightColorScheme.surface,
                 modifier = Modifier.fillMaxSize(),
             ) {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    containerColor = if (isSystemInDarkTheme()) DarkColorScheme.background else LightColorScheme.background,
+                    containerColor = if (isSystemInDarkTheme()) colorScheme.background else LightColorScheme.background,
                     snackbarHost = { SnackbarHost(snackbarHostState) },
                 ) {
                     ModalNavigationDrawer(
@@ -448,7 +466,7 @@ fun HomeScreen(
                                     bottomStart = 0.dp,
                                     bottomEnd = 100.dp
                                 ),
-                                drawerContainerColor = DarkColorScheme.background,
+                                drawerContainerColor = colorScheme.background,
                                 drawerTonalElevation = 10.dp,
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -468,13 +486,13 @@ fun HomeScreen(
                                         Icon(
                                             imageVector = Icons.Outlined.Refresh,
                                             contentDescription = "Reset all counts",
-                                            tint = DarkColorScheme.secondary
+                                            tint = colorScheme.secondary
                                         )
                                     }
                                     Text(
                                         text = "تسابيح",
                                         style = MaterialTheme.typography.headlineMedium,
-                                        color = DarkColorScheme.tertiary,
+                                        color = colorScheme.tertiary,
                                         modifier = Modifier
                                             .padding(top = 10.dp)
                                             .align(Alignment.TopCenter)
@@ -491,7 +509,7 @@ fun HomeScreen(
                                         Icon(
                                             imageVector = Icons.Outlined.Close,
                                             contentDescription = "Close Menu",
-                                            tint = DarkColorScheme.secondary
+                                            tint = colorScheme.secondary
                                         )
                                     }
                                 }
@@ -499,19 +517,19 @@ fun HomeScreen(
                                 Text(
                                     text = dateString,
                                     style = MaterialTheme.typography.bodyLarge,
-                                    color = DarkColorScheme.primary,
+                                    color = colorScheme.primary,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(top = 20.dp)
                                         .background(
-                                            DarkColorScheme.secondary,
+                                            colorScheme.secondary,
                                         ),
                                     textAlign = TextAlign.Center
                                 )
                                 Spacer(Modifier.height(12.dp))
                                 LazyColumn(
                                     modifier = Modifier
-                                        .fillMaxSize(),
+                                        .fillMaxWidth(),
                                     verticalArrangement = Arrangement.Top,
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ){
@@ -535,14 +553,14 @@ fun HomeScreen(
                                                             Icons.Outlined.PlayArrow
                                                         },
                                                         contentDescription = "icon",
-                                                        tint = DarkColorScheme.secondary
+                                                        tint = colorScheme.secondary
                                                     )
                                                 },
                                                 label = {
                                                     Text(
                                                         text = item.toString(),
                                                         style = MaterialTheme.typography.headlineSmall,
-                                                        color = DarkColorScheme.secondary
+                                                        color = colorScheme.secondary
                                                     )
                                                 },
                                                 onClick = {
@@ -557,12 +575,12 @@ fun HomeScreen(
                                                 },
 
                                                 colors = NavigationDrawerItemDefaults.colors(
-                                                    selectedTextColor = DarkColorScheme.secondary,
-                                                    unselectedTextColor = DarkColorScheme.secondary,
-                                                    selectedContainerColor = DarkColorScheme.primary,
-                                                    unselectedContainerColor = DarkColorScheme.surface,
-                                                    selectedIconColor = DarkColorScheme.secondary,
-                                                    unselectedIconColor = DarkColorScheme.secondary,
+                                                    selectedTextColor = colorScheme.secondary,
+                                                    unselectedTextColor = colorScheme.secondary,
+                                                    selectedContainerColor = colorScheme.primary,
+                                                    unselectedContainerColor = colorScheme.surface,
+                                                    selectedIconColor = colorScheme.secondary,
+                                                    unselectedIconColor = colorScheme.secondary,
                                                 ),
 
                                                 badge = {
@@ -574,14 +592,14 @@ fun HomeScreen(
                                                                 Text(
                                                                     text = count.toString(),
                                                                     style = MaterialTheme.typography.bodyMedium,
-                                                                    color = DarkColorScheme.secondary
+                                                                    color = colorScheme.secondary
                                                                 )
                                                             }
                                                         }
                                                     } else {
                                                         Icon(
-                                                            imageVector = Icons.Outlined.MoreVert,
-                                                            tint = DarkColorScheme.secondary,
+                                                            imageVector = Icons.Outlined.Add,
+                                                            tint = colorScheme.secondary,
                                                             contentDescription = "More Tasbeehs"
                                                         )
                                                     }
@@ -608,6 +626,13 @@ fun HomeScreen(
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
                                         Text(
+                                            text = "Developed by Abdulqadir Bhinderwala",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = colorScheme.secondary,
+                                            modifier = Modifier
+                                                .padding(bottom = 10.dp)
+                                        )
+                                        Text(
                                             text = "v${
                                                 LocalContext.current.packageManager.getPackageInfo(
                                                     LocalContext.current.packageName,
@@ -615,7 +640,7 @@ fun HomeScreen(
                                                 ).versionName
                                             }",
                                             style = MaterialTheme.typography.bodyMedium,
-                                            color = DarkColorScheme.secondary,
+                                            color = colorScheme.secondary,
                                             modifier = Modifier
                                                 .padding(bottom = 20.dp)
                                         )
@@ -638,7 +663,7 @@ fun HomeScreen(
                                     modifier = Modifier
                                         .align(Alignment.TopEnd)
                                         .background(
-                                            DarkColorScheme.primary,
+                                            colorScheme.primary,
                                         ),
                                 ) {
                                     DropdownMenuItem(
@@ -657,7 +682,7 @@ fun HomeScreen(
                                                     text = "Vibrate",
                                                     style = MaterialTheme.typography.bodyMedium,
                                                     modifier = Modifier.padding(end = 10.dp),
-                                                    color = DarkColorScheme.secondary,
+                                                    color = colorScheme.secondary,
 
                                                     )
                                                 Switch(
@@ -673,10 +698,10 @@ fun HomeScreen(
                                                         .padding(start = 10.dp)
                                                         .height(20.dp),
                                                     colors = SwitchDefaults.colors(
-                                                        checkedThumbColor = DarkColorScheme.primary,
-                                                        uncheckedThumbColor = DarkColorScheme.secondary,
-                                                        uncheckedTrackColor = DarkColorScheme.primary,
-                                                        checkedTrackColor = DarkColorScheme.secondary
+                                                        checkedThumbColor = colorScheme.primary,
+                                                        uncheckedThumbColor = colorScheme.secondary,
+                                                        uncheckedTrackColor = colorScheme.primary,
+                                                        checkedTrackColor = colorScheme.secondary
                                                     ),
                                                 )
                                             }
@@ -700,7 +725,7 @@ fun HomeScreen(
                                         modifier = Modifier
                                             .padding(start = 20.dp, top = 40.dp)
                                             .background(
-                                                DarkColorScheme.secondary,
+                                                colorScheme.secondary,
                                                 MaterialTheme.shapes.extraLarge
                                             )
 
@@ -708,7 +733,7 @@ fun HomeScreen(
                                         Icon(
                                             imageVector = Icons.Outlined.Menu,
                                             contentDescription = "Menu",
-                                            tint = DarkColorScheme.primary,
+                                            tint = colorScheme.primary,
                                             modifier = Modifier.size(30.dp)
                                         )
                                     }
@@ -722,7 +747,7 @@ fun HomeScreen(
                                             imageVector = Icons.Outlined.Settings,
                                             modifier = Modifier.size(30.dp),
                                             contentDescription = "Settings",
-                                            tint = DarkColorScheme.secondary,
+                                            tint = colorScheme.secondary,
                                         )
                                     }
                                 }
@@ -834,6 +859,23 @@ fun HomeScreen(
                                                         delta
                                                     },
                                                     Orientation.Vertical
+                                                )
+                                                .nestedScroll(nestedScrollConnection)
+                                                .animateEnterExit(
+                                                    enter = slideInVertically(
+                                                        initialOffsetY = { 400 },
+                                                        animationSpec = tween(
+                                                            durationMillis = 1000,
+                                                            easing = FastOutSlowInEasing
+                                                        )
+                                                    ),
+                                                    exit = slideOutVertically(
+                                                        targetOffsetY = { 400 },
+                                                        animationSpec = tween(
+                                                            durationMillis = 1000,
+                                                            easing = FastOutSlowInEasing
+                                                        )
+                                                    )
                                                 ),
                                             state = rememberLazyStaggeredGridState(),
                                             columns = StaggeredGridCells.Adaptive(150.dp)

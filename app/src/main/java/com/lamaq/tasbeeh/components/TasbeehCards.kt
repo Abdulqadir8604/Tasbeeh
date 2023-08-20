@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,6 +50,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.lamaq.tasbeeh.ui.theme.DarkColorScheme
+import com.lamaq.tasbeeh.ui.theme.LightColorScheme
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -61,6 +63,12 @@ fun TasbeehCards(
     var multiTasbeeh by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
+    var colorScheme = if (isSystemInDarkTheme()) {
+        DarkColorScheme
+    } else {
+        LightColorScheme
+    }
+    
     if (tasbeehData.hasSub.containsKey(fieldName)) {
         multiTasbeeh = true
     }
@@ -85,15 +93,15 @@ fun TasbeehCards(
             .widthIn(min = 200.dp, max = 350.dp)
             .heightIn(min = 200.dp, max = 350.dp)
             .background(
-                color = DarkColorScheme.primary,
+                color = colorScheme.primary,
                 shape = MaterialTheme.shapes.large
             ),
         elevation = CardDefaults.elevatedCardElevation(
             defaultElevation = 0.dp,
         ),
         colors = CardDefaults.cardColors(
-            containerColor = DarkColorScheme.primary,
-            contentColor = DarkColorScheme.onPrimary,
+            containerColor = colorScheme.primary,
+            contentColor = colorScheme.onPrimary,
         ),
     ) {
         Column(
@@ -119,7 +127,7 @@ fun TasbeehCards(
                                 )
                             )
                         )
-                    ) DarkColorScheme.tertiary else DarkColorScheme.secondary,
+                    ) colorScheme.tertiary else colorScheme.secondary,
                     fontSize = MaterialTheme.typography.headlineMedium.fontSize,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -144,7 +152,7 @@ fun TasbeehCards(
                             .padding(4.dp)
                             .fillMaxWidth(),
                         textAlign = TextAlign.Center,
-                        color = DarkColorScheme.secondary,
+                        color = colorScheme.secondary,
                         fontWeight = FontWeight.ExtraLight,
                     )
                 }
@@ -160,14 +168,14 @@ fun TasbeehCards(
                         .fillMaxWidth()
                         .padding(16.dp),
                     colors = ButtonDefaults.elevatedButtonColors(
-                        containerColor = DarkColorScheme.tertiary,
-                        contentColor = DarkColorScheme.onTertiary
+                        containerColor = colorScheme.tertiary,
+                        contentColor = colorScheme.onTertiary
                     ),
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.ArrowForward,
                         contentDescription = "Go",
-                        tint = DarkColorScheme.onTertiary,
+                        tint = colorScheme.onTertiary,
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -178,7 +186,7 @@ fun TasbeehCards(
                     modifier = Modifier
                         .padding(top = 16.dp, bottom = 8.dp),
                     textAlign = TextAlign.Start,
-                    color = DarkColorScheme.secondary
+                    color = colorScheme.secondary
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Box(
@@ -201,7 +209,7 @@ fun TasbeehCards(
                         modifier = Modifier
                             .padding(16.dp),
                         textAlign = TextAlign.End,
-                        color = DarkColorScheme.secondary,
+                        color = colorScheme.secondary,
                         fontSize = MaterialTheme.typography.headlineLarge.fontSize,
                     )
                 }
@@ -217,14 +225,14 @@ fun TasbeehCards(
                         .fillMaxWidth()
                         .padding(16.dp),
                     colors = ButtonDefaults.elevatedButtonColors(
-                        containerColor = DarkColorScheme.tertiary,
-                        contentColor = DarkColorScheme.onTertiary
+                        containerColor = colorScheme.tertiary,
+                        contentColor = colorScheme.onTertiary
                     ),
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.ArrowForward,
                         contentDescription = "Go",
-                        tint = DarkColorScheme.onTertiary,
+                        tint = colorScheme.onTertiary,
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -257,7 +265,7 @@ fun TasbeehCards(
                         Text(
                             "Edit Total Count",
                             style = MaterialTheme.typography.bodyLarge,
-                            color = DarkColorScheme.inversePrimary
+                            color = colorScheme.inversePrimary
                         )
                     },
                     modifier = Modifier
@@ -270,11 +278,11 @@ fun TasbeehCards(
                     textStyle = MaterialTheme.typography.headlineLarge,
 
                     colors = TextFieldDefaults.textFieldColors(
-                        containerColor = DarkColorScheme.background,
-                        focusedIndicatorColor = DarkColorScheme.background,
-                        unfocusedIndicatorColor = DarkColorScheme.background,
-                        cursorColor = DarkColorScheme.secondary,
-                        textColor = DarkColorScheme.secondary,
+                        containerColor = colorScheme.background,
+                        focusedIndicatorColor = colorScheme.background,
+                        unfocusedIndicatorColor = colorScheme.background,
+                        cursorColor = colorScheme.secondary,
+                        textColor = colorScheme.secondary,
                     ),
                     maxLines = 1,
                     singleLine = true,
@@ -307,7 +315,7 @@ fun TasbeehCards(
                         Icon(
                             imageVector = Icons.Outlined.Done,
                             contentDescription = "Done",
-                            tint = DarkColorScheme.primary,
+                            tint = colorScheme.primary,
                             modifier = Modifier.size(50.dp)
                         )
                     }
@@ -325,7 +333,7 @@ fun TasbeehCards(
                         Icon(
                             imageVector = Icons.Outlined.Close,
                             contentDescription = "Close",
-                            tint = DarkColorScheme.tertiary,
+                            tint = colorScheme.tertiary,
                             modifier = Modifier.size(50.dp)
                         )
                     }

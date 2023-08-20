@@ -18,7 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-val DarkColorScheme = darkColorScheme(
+val LightColorScheme = darkColorScheme(
     surface = Color(0xFFFDEAC9),
     background = Color(0xFFFDEAC9),
     primary = Color(0xFFFCD697),
@@ -30,7 +30,7 @@ val DarkColorScheme = darkColorScheme(
     inversePrimary = Color(0xFFBE7348), //for textField label
 )
 
-val LightColorScheme = lightColorScheme(
+val DarkColorScheme = lightColorScheme(
     surface = Color(0xFFFDEAC9),
     background = Color(0xFFFDEAC9),
     primary = Color(0xFFFCD697),

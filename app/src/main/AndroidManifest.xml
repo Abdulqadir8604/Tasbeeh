@@ -15,8 +15,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Tasbeeh"
-        tools:targetApi="31">
+        android:theme="@style/Theme.Tasbeeh">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -31,7 +30,8 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".firebase.FMS"
+        <service
+            android:name=".firebase.FMS"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -47,6 +47,15 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/primary" />
+
+        <receiver android:name=".widget.WidgetReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/counter_widget_info" />
+        </receiver>
 
     </application>
 

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <style name="Theme.TasbeehSplash" parent="Theme.SplashScreen.IconBackground">
 
         <item name="windowSplashScreenBackground">@color/background</item>
@@ -8,6 +9,7 @@
         <item name="postSplashScreenTheme">@style/Theme.Tasbeeh</item>
 
     </style>
+
     <style name="Theme.Tasbeeh" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowTranslucentStatus">
             false

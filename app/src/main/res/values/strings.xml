@@ -2,4 +2,6 @@
     <string name="app_name">Tasbeeh</string>
     <string name="title_activity_main2">MainActivity2</string>
     <string name="default_notification_channel_id">tasbeeh_aq</string>
+    <string name="title_activity_qibla_direction">QiblaDirection</string>
+    <string name="widget_description">A Tasbeeh counter on your HomeScreen</string>
 </resources>
