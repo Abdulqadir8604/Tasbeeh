@@ -38,7 +38,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridS
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Notifications
@@ -106,17 +105,13 @@ import com.lamaq.tasbeeh.ui.theme.DrawerScrimColor
 import com.lamaq.tasbeeh.ui.theme.LightColorScheme
 import com.lamaq.tasbeeh.ui.theme.TasbeehRippleTheme
 import com.lamaq.tasbeeh.ui.theme.TasbeehTheme
-import com.lamaq.tasbeeh.util.ApiService
-import com.lamaq.tasbeeh.util.Welcome
 import com.lamaq.tasbeeh.util.convertToArabicDigits
 import com.lamaq.tasbeeh.util.fullMonthName
-import com.lamaq.tasbeeh.util.getCurrentDate
 import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import java.sql.Time
+import java.time.LocalDate
+import java.time.chrono.HijrahDate
+import java.time.format.DateTimeFormatter
+import java.util.Calendar
 import kotlin.system.exitProcess
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -194,15 +189,13 @@ fun HomeScreen(
     val areNotificationsEnabled = notificationManager.areNotificationsEnabled()
 
     var dateString by remember { mutableStateOf("") }
-    var hDay by remember { mutableStateOf("") }
-    var hYear by remember { mutableStateOf("") }
 
     if (!askedForNotiPer) {
         if (!areNotificationsEnabled) {
             showNotifAlert = true
         }
     }
-    
+
     val colorScheme = if (isSystemInDarkTheme()) DarkColorScheme else LightColorScheme
 
     if (showNotifAlert) {
@@ -308,41 +301,27 @@ fun HomeScreen(
         }
     }
 
-    val retrofit = Retrofit.Builder()
-        .baseUrl("https://api.aladhan.com/")
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
+    val gDay = LocalDate.now().dayOfMonth
+    val gMonth = LocalDate.now().monthValue
+    val gYear = LocalDate.now().year
+    val time = Calendar.getInstance().time
 
-    val apiService = retrofit.create(ApiService::class.java)
+    val hDate: HijrahDate = HijrahDate.from(LocalDate.of(gYear, gMonth, gDay))
 
-    val call = apiService.convertToHijri(getCurrentDate())
-    call.enqueue(object : retrofit2.Callback<Welcome> {
-        override fun onResponse(call: Call<Welcome>, response: Response<Welcome>) {
-            if (response.isSuccessful) {
-                val welcomeResponse = response.body()
-                val month = fullMonthName[welcomeResponse?.data?.hijri?.month?.number.toString()]
-                var day = convertToArabicDigits(welcomeResponse?.data?.hijri?.day.toString())
-                val year = convertToArabicDigits(welcomeResponse?.data?.hijri?.year.toString())
-                val hijriDate =
-                    if (Time(System.currentTimeMillis()).hours >= 19 || Time(System.currentTimeMillis()).hours <= 5) {
-                        // meaning it is night
-                        day = convertToArabicDigits(
-                            welcomeResponse?.data?.hijri?.day?.toInt()?.plus(1).toString()
-                        )
-                        "$day رات $month $year"
-                    } else {
-                        "$day $month $year"
-                    }
-                dateString = hijriDate
-            } else {
-                println(response.errorBody())
-            }
-        }
+    val formattedHDate = hDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"))
 
-        override fun onFailure(call: Call<Welcome>, t: Throwable) {
-            dateString = "internet needed"
-        }
-    })
+    var hDay = ""
+    val hMonth = fullMonthName[formattedHDate.substring(3, formattedHDate.length - 5)]
+    val hYear = convertToArabicDigits(formattedHDate.substring(formattedHDate.length - 4))
+
+    dateString = if (time.hours >= 19 || time.hours <= 5) {
+        // meaning it is night
+        hDay = convertToArabicDigits(formattedHDate.substring(0, 2).toInt().plus(1).toString())
+        "$hDay رات  $hMonth  $hYear"
+    } else {
+        hDay = convertToArabicDigits(formattedHDate.substring(0, 2))
+        "$hDay  $hMonth  $hYear"
+    }
 
     TasbeehTheme {
 
@@ -596,13 +575,8 @@ fun HomeScreen(
                                                                 )
                                                             }
                                                         }
-                                                    } else {
-                                                        Icon(
-                                                            imageVector = Icons.Outlined.Add,
-                                                            tint = colorScheme.secondary,
-                                                            contentDescription = "More Tasbeehs"
-                                                        )
                                                     }
+                                                    //if want to add an icon to the multi tasbeeh then add an else statement here
                                                 },
 
                                                 shape = RoundedCornerShape(

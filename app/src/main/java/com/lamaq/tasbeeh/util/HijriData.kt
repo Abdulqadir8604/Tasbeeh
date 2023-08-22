@@ -1,77 +1,4 @@
 package com.lamaq.tasbeeh.util
-import retrofit2.Call
-import retrofit2.http.GET
-import retrofit2.http.Path
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
-data class Welcome (
-    val code: Long,
-    val status: String,
-    val data: Data
-)
-
-data class Data (
-    val hijri: Hijri,
-    val gregorian: Gregorian
-)
-
-data class Gregorian (
-    val date: String,
-    val format: String,
-    val day: String,
-    val weekday: GregorianWeekday,
-    val month: GregorianMonth,
-    val year: String,
-    val designation: Designation
-)
-
-data class Designation (
-    val abbreviated: String,
-    val expanded: String
-)
-
-data class GregorianMonth (
-    val number: Long,
-    val en: String
-)
-
-data class GregorianWeekday (
-    val en: String
-)
-
-data class Hijri (
-    val date: String,
-    val format: String,
-    val day: String,
-    val weekday: HijriWeekday,
-    val month: HijriMonth,
-    val year: String,
-    val designation: Designation,
-    val holidays: List<Any?>
-)
-
-data class HijriMonth (
-    val number: Long,
-    val en: String,
-    val ar: String
-)
-
-data class HijriWeekday (
-    val en: String,
-    val ar: String
-)
-
-interface ApiService {
-    @GET("v1/gToH/{date}")
-    fun convertToHijri(@Path("date") date: String): Call<Welcome>
-}
-
-fun getCurrentDate(): String {
-    val currentDate = LocalDate.now()
-    val dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
-    return currentDate.format(dateFormatter)
-}
 
 val engToArabic = mapOf(
     1 to "١",
@@ -109,17 +36,17 @@ fun convertToArabicDigits(input: String): String {
 }
 
 val fullMonthName = mapOf(
-    "1" to "محرم الحرام",
-    "2" to "صفر المظفر",
-    "3" to "ربيع الأول",
-    "4" to "ربيع الآخر",
-    "5" to "جمادى الأولى",
-    "6" to "جمادى الآخرة",
-    "7" to "رجب الأصب",
-    "8" to "شعبان الكريم",
-    "9" to "رمضان المعظم",
-    "10" to "شوال المكرم",
-    "11" to "ذو القعدة الحرام",
-    "12" to "ذو الحجة الحرام"
+    "Muharram" to "محرم الحرام",
+    "Safar" to "صفر المظفر",
+    "Rabiʻ I" to "ربيع الأول",
+    "Rabiʻ II" to "ربيع الآخر",
+    "Jumada I" to "جمادى الأولى",
+    "Jumada II" to "جمادى الآخرة",
+    "Rajab" to "رجب الأصب",
+    "Shaʻban" to "شعبان الكريم",
+    "Ramadan" to "رمضان المعظم",
+    "Shawwal" to "شوال المكرم",
+    "Dhuʻl-Qiʻdah" to "ذو القعدة الحرام",
+    "Dhuʻl-Hijjah" to "ذو الحجة الحرام"
 )
 
