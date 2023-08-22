@@ -39,6 +39,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.PlayArrow
@@ -47,6 +48,8 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -132,6 +135,10 @@ fun HomeScreen(
     val settingsPref = LocalContext.current.getSharedPreferences(
         "settings", Context.MODE_PRIVATE
     )
+    val onboardingPref = LocalContext.current.getSharedPreferences(
+        "onboarding", Context.MODE_PRIVATE
+    )
+
     var hasHaptics by remember { mutableStateOf(true) }
     val haptic = LocalHapticFeedback.current
     hasHaptics = settingsPref.getBoolean("hasHaptics", true)
@@ -511,7 +518,7 @@ fun HomeScreen(
                                         .fillMaxWidth(),
                                     verticalArrangement = Arrangement.Top,
                                     horizontalAlignment = Alignment.CenterHorizontally
-                                ){
+                                ) {
                                     items(1) {
                                         tasbeehData.tasbeehTypes.forEach { item ->
                                             NavigationDrawerItem(
@@ -599,6 +606,39 @@ fun HomeScreen(
                                         verticalArrangement = Arrangement.Bottom,
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
+                                        Button(
+                                            modifier = Modifier
+                                                .padding(bottom = 10.dp),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = colorScheme.primaryContainer,
+                                                contentColor = colorScheme.secondary
+                                            ),
+                                            shape = RoundedCornerShape(30.dp),
+                                            onClick = {
+                                                scope.launch {
+                                                    drawerState.close()
+                                                }
+                                                navController.navigate("onboarding")
+                                            }
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Outlined.Info,
+                                                    contentDescription = "Info",
+                                                    tint = colorScheme.secondary,
+                                                    modifier = Modifier.size(30.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(5.dp))
+                                                Text(
+                                                    text = "Tutorial",
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = colorScheme.secondary,
+                                                    modifier = Modifier.padding(start = 10.dp)
+                                                )
+                                            }
+                                        }
                                         Text(
                                             text = "Developed by Abdulqadir Bhinderwala",
                                             style = MaterialTheme.typography.bodySmall,
@@ -861,10 +901,17 @@ fun HomeScreen(
                                                     fieldName = tasbeehName.toString(),
                                                     tasbeehData = tasbeehData,
                                                 ) { _, _ ->
-                                                    if (hasHaptics) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                    if (hasHaptics) haptic.performHapticFeedback(
+                                                        HapticFeedbackType.LongPress
+                                                    )
                                                     visible = false
                                                     navController.navigate(
-                                                        "tasbeeh/${item}/${sharedPref?.getInt(item, 0)}"
+                                                        "tasbeeh/${item}/${
+                                                            sharedPref?.getInt(
+                                                                item,
+                                                                0
+                                                            )
+                                                        }"
                                                     )
                                                 }
                                             }

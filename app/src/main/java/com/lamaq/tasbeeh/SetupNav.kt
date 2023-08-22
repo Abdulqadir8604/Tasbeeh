@@ -1,12 +1,15 @@
 package com.lamaq.tasbeeh
 
+import android.content.Context.MODE_PRIVATE
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.lamaq.tasbeeh.components.TasbeehData
+import com.lamaq.tasbeeh.presentation.onboarding.OnBoardingScreen
 
 @Composable
 fun SetupNav(
@@ -14,7 +17,22 @@ fun SetupNav(
     navController: NavHostController,
 ) {
 
-    NavHost(navController = navController, startDestination = "home/${tasbeehData.homeTasbeeh.elementAt(0)}}") {
+    val onboardingPref = LocalContext.current.getSharedPreferences(
+        "onboarding", MODE_PRIVATE
+    )
+
+    NavHost(
+        navController = navController,
+        startDestination = if (onboardingPref.getBoolean("onboardingDone", false)) "home/${tasbeehData.homeTasbeeh.elementAt(0)}" else "onboarding",
+    ) { //home/${tasbeehData.homeTasbeeh.elementAt(0)}}
+        composable(
+            "onboarding",
+        ) {
+            OnBoardingScreen(
+                navController = navController,
+                tasbeehData = tasbeehData
+            )
+        }
         composable(
             "home/{tasbeehData}",
             arguments = listOf(

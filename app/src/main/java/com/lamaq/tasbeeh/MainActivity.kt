@@ -22,7 +22,7 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         installSplashScreen()
         setContent {
-
+            val navController = rememberNavController()
             var tasbeehData by remember {
                 mutableStateOf(
                     TasbeehData(
@@ -61,7 +61,6 @@ class MainActivity : ComponentActivity() {
                     Log.w("FIRESTORE", "Error getting documents.", exception)
                 }
 
-            val navController = rememberNavController()
             SetupNav(
                 tasbeehData = tasbeehData,
                 navController = navController
