@@ -91,6 +91,7 @@ import com.lamaq.tasbeeh.components.TasbeehData
 import com.lamaq.tasbeeh.ui.theme.DarkColorScheme
 import com.lamaq.tasbeeh.ui.theme.LightColorScheme
 import com.lamaq.tasbeeh.ui.theme.TasbeehTheme
+import com.lamaq.tasbeeh.util.LoadImageFromUrl
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -156,8 +157,8 @@ fun TasbeehScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    
-    var colorScheme = if (isSystemInDarkTheme()) DarkColorScheme else LightColorScheme
+
+    val colorScheme = if (isSystemInDarkTheme()) DarkColorScheme else LightColorScheme
 
     TasbeehTheme {
         Surface(
@@ -397,69 +398,145 @@ fun TasbeehScreen(
                                 modifier = Modifier.wrapContentSize(),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Text(
-                                    text = if (tasbeehName in tasbeehData.longTasbeehs)
-                                        tasbeehData.longTasbeehs.filter { it.key == tasbeehName }.values.first().toString()
-                                    else
-                                        tasbeehName,
-                                    style = if (tasbeehData.longTasbeehs.contains(tasbeehName))
-                                        MaterialTheme.typography.headlineSmall
-                                    else
-                                        MaterialTheme.typography.headlineLarge,
-                                    modifier = if (tasbeehData.longTasbeehs.contains(tasbeehName))
-                                        Modifier.padding(top = 40.dp)
-                                            .combinedClickable (
-                                                onClick = {
-                                                          Toast.makeText(context, "Long press to hear the tasbeeh", Toast.LENGTH_SHORT).show()
-                                                },
-                                                onLongClick = {
-                                                    tts = TextToSpeech(context) { status ->
-                                                        if (status == TextToSpeech.SUCCESS) {
-                                                            val result = tts?.setLanguage(Locale.forLanguageTag("ar"))
-                                                            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                                                                tts = null
-                                                            } else {
-                                                                tts?.speak(
-                                                                    if (tasbeehName in tasbeehData.longTasbeehs)
-                                                                        tasbeehData.longTasbeehs.filter { it.key == tasbeehName }.values.first().toString()
-                                                                    else
+                                if (tasbeehName in tasbeehData.longTasbeehs) {
+                                    if (tasbeehData.longTasbeehs.filter { it.key == tasbeehName }.values.first()
+                                            .toString().contains("http")
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(start = 20.dp, end = 20.dp)
+                                        ) {
+                                            LoadImageFromUrl(url = tasbeehData.longTasbeehs.filter { it.key == tasbeehName }.values.first().toString())
+                                        }
+                                    }
+                                    else{
+                                        Text(
+                                            text = tasbeehData.longTasbeehs.filter { it.key == tasbeehName }.values.first().toString(),
+                                            style = MaterialTheme.typography.headlineSmall,
+                                            modifier = Modifier
+                                                .padding(top = 40.dp)
+                                                .combinedClickable(
+                                                    onClick = {
+                                                        Toast
+                                                            .makeText(
+                                                                context,
+                                                                "Long press to hear the tasbeeh",
+                                                                Toast.LENGTH_SHORT
+                                                            )
+                                                            .show()
+                                                    },
+                                                    onLongClick = {
+                                                        tts = TextToSpeech(context) { status ->
+                                                            if (status == TextToSpeech.SUCCESS) {
+                                                                val result = tts?.setLanguage(
+                                                                    Locale.forLanguageTag("ar")
+                                                                )
+                                                                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                                                                    tts = null
+                                                                } else {
+                                                                    tts?.speak(
+                                                                        if (tasbeehName in tasbeehData.longTasbeehs)
+                                                                            tasbeehData.longTasbeehs.filter { it.key == tasbeehName }.values
+                                                                                .first()
+                                                                                .toString()
+                                                                        else
+                                                                            tasbeehName,
+                                                                        TextToSpeech.QUEUE_FLUSH,
+                                                                        null,
+                                                                        null
+                                                                    )
+                                                                }
+                                                            }
+                                                        }
+                                                    },
+                                                ),
+                                            color = colorScheme.secondary,
+                                            textAlign = TextAlign.Center,
+                                        )
+                                    }
+                                } else {
+                                    Text(
+                                        text = tasbeehName,
+                                        style = if (tasbeehData.longTasbeehs.contains(tasbeehName))
+                                            MaterialTheme.typography.headlineSmall
+                                        else
+                                            MaterialTheme.typography.headlineLarge,
+                                        modifier = if (tasbeehData.longTasbeehs.contains(tasbeehName))
+                                            Modifier
+                                                .padding(top = 40.dp)
+                                                .combinedClickable(
+                                                    onClick = {
+                                                        Toast
+                                                            .makeText(
+                                                                context,
+                                                                "Long press to hear the tasbeeh",
+                                                                Toast.LENGTH_SHORT
+                                                            )
+                                                            .show()
+                                                    },
+                                                    onLongClick = {
+                                                        tts = TextToSpeech(context) { status ->
+                                                            if (status == TextToSpeech.SUCCESS) {
+                                                                val result = tts?.setLanguage(
+                                                                    Locale.forLanguageTag("ar")
+                                                                )
+                                                                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                                                                    tts = null
+                                                                } else {
+                                                                    tts?.speak(
+                                                                        if (tasbeehName in tasbeehData.longTasbeehs)
+                                                                            tasbeehData.longTasbeehs.filter { it.key == tasbeehName }.values
+                                                                                .first()
+                                                                                .toString()
+                                                                        else
+                                                                            tasbeehName,
+                                                                        TextToSpeech.QUEUE_FLUSH,
+                                                                        null,
+                                                                        null
+                                                                    )
+                                                                }
+                                                            }
+                                                        }
+                                                    },
+                                                )
+                                        else
+                                            Modifier
+                                                .padding(top = 30.dp)
+                                                .combinedClickable(
+                                                    onClick = {
+                                                        Toast
+                                                            .makeText(
+                                                                context,
+                                                                "Long press to hear the tasbeeh",
+                                                                Toast.LENGTH_SHORT
+                                                            )
+                                                            .show()
+                                                    },
+                                                    onLongClick = {
+                                                        tts = TextToSpeech(context) { status ->
+                                                            if (status == TextToSpeech.SUCCESS) {
+                                                                val result = tts?.setLanguage(
+                                                                    Locale.forLanguageTag("ar")
+                                                                )
+                                                                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                                                                    tts = null
+                                                                } else {
+                                                                    tts?.speak(
                                                                         tasbeehName,
-                                                                    TextToSpeech.QUEUE_FLUSH,
-                                                                    null,
-                                                                    null
-                                                                )
+                                                                        TextToSpeech.QUEUE_FLUSH,
+                                                                        null,
+                                                                        null
+                                                                    )
+                                                                }
                                                             }
                                                         }
-                                                    }
-                                                },
-                                            )
-                                    else
-                                        Modifier.padding(top = 30.dp)
-                                            .combinedClickable (
-                                                onClick = {
-                                                    Toast.makeText(context, "Long press to hear the tasbeeh", Toast.LENGTH_SHORT).show()
-                                                },
-                                                onLongClick = {
-                                                    tts = TextToSpeech(context) { status ->
-                                                        if (status == TextToSpeech.SUCCESS) {
-                                                            val result = tts?.setLanguage(Locale.forLanguageTag("ar"))
-                                                            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                                                                tts = null
-                                                            } else {
-                                                                tts?.speak(
-                                                                    tasbeehName,
-                                                                    TextToSpeech.QUEUE_FLUSH,
-                                                                    null,
-                                                                    null
-                                                                )
-                                                            }
-                                                        }
-                                                    }
-                                                },
-                                            ),
-                                    color = colorScheme.secondary,
-                                    textAlign = TextAlign.Center,
-                                )
+                                                    },
+                                                ),
+                                        color = colorScheme.secondary,
+                                        textAlign = TextAlign.Center,
+                                    )
+                                }
                                 val textSizeStyle = TextStyle(
                                     color = colorScheme.secondary,
                                     fontSize = 60.sp,
@@ -607,17 +684,30 @@ fun TasbeehScreen(
                                     modifier = Modifier.fillMaxSize(),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    Spacer(modifier = Modifier.padding(20.dp))
-                                    Text(
-                                        text = "+1",
-                                        modifier = Modifier.padding(top = 65.dp),
-                                        style = MaterialTheme.typography.headlineLarge,
-                                        color = colorScheme.onPrimaryContainer,
-                                    )
+                                    Spacer(modifier = Modifier.padding(top = 20.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .padding(top =
+                                            if (tasbeehData.shortNames.contains(tasbeehName))
+                                                60.dp
+                                            else
+                                                40.dp
+                                            )
+                                            .fillMaxWidth()
+                                            .align(Alignment.CenterHorizontally),
+                                    ) {
+                                        Text(
+                                            text = "+1",
+                                            modifier = Modifier
+                                                .align(Alignment.BottomCenter),
+                                            style = MaterialTheme.typography.headlineLarge,
+                                            color = colorScheme.onPrimaryContainer,
+                                        )
+                                    }
                                 }
                                 Row(
                                     modifier = Modifier
-                                        .padding(bottom = 55.dp)
+                                        .padding(bottom = 50.dp)
                                         .align(Alignment.BottomCenter),
                                     horizontalArrangement = Arrangement.SpaceEvenly
                                 ) {
@@ -878,11 +968,12 @@ fun TasbeehScreen(
                                     IconButton(
                                         onClick = {
                                             showLimitDialog = false
-                                            limit = if (editableCounter.isNotEmpty() && editableCounter.toInt() > 0) {
-                                                editableCounter.toInt()
-                                            } else {
-                                                defaultLimit
-                                            }
+                                            limit =
+                                                if (editableCounter.isNotEmpty() && editableCounter.toInt() > 0) {
+                                                    editableCounter.toInt()
+                                                } else {
+                                                    defaultLimit
+                                                }
                                         },
                                         modifier = Modifier
                                             .padding(5.dp)

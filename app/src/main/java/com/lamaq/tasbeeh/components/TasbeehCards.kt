@@ -187,7 +187,7 @@ fun TasbeehCards(
                     style = MaterialTheme.typography.headlineLarge,
                     modifier = Modifier
                         .padding(top = 16.dp, bottom = 8.dp),
-                    textAlign = TextAlign.Start,
+                    textAlign = TextAlign.Center,
                     color = colorScheme.secondary,
                     lineHeight = 1.em,
                 )

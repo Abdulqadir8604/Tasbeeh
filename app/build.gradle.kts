@@ -12,8 +12,8 @@ android {
         applicationId = "com.lamaq.tasbeeh"
         minSdk = 28
         targetSdk = 34
-        versionCode = 8
-        versionName = "4.0"
+        versionCode = 11
+        versionName = "4.6.9"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -80,6 +80,10 @@ dependencies {
     implementation("androidx.glance:glance:1.0.0-rc01")
     // For AppWidgets support
     implementation("androidx.glance:glance-appwidget:1.0.0-rc01")
+    implementation("androidx.benchmark:benchmark-common:1.1.1")
+
+    implementation("com.github.bumptech.glide:glide:4.13.0")
+    implementation("com.google.android.engage:engage-core:1.2.0")
 
 
     testImplementation("junit:junit:4.13.2")

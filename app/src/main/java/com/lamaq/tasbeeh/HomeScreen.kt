@@ -540,8 +540,8 @@ fun HomeScreen(
                                                     .padding(
                                                         start = 0.dp,
                                                         end = 30.dp,
-                                                        top = 10.dp,
-                                                        bottom = 10.dp
+                                                        top = 5.dp,
+                                                        bottom = 5.dp
                                                     )
                                                     .fillMaxWidth(),
                                                 icon = {
@@ -558,7 +558,7 @@ fun HomeScreen(
                                                 label = {
                                                     Text(
                                                         text = item.toString(),
-                                                        style = MaterialTheme.typography.headlineSmall,
+                                                        style = MaterialTheme.typography.bodyLarge,
                                                         color = colorScheme.secondary
                                                     )
                                                 },
