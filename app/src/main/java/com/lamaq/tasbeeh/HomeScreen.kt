@@ -4,7 +4,10 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
@@ -14,6 +17,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
@@ -311,7 +315,7 @@ fun HomeScreen(
     val gDay = LocalDate.now().dayOfMonth
     val gMonth = LocalDate.now().monthValue
     val gYear = LocalDate.now().year
-    val time = Calendar.getInstance().time
+    val time = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
 
     val hDate: HijrahDate = HijrahDate.from(LocalDate.of(gYear, gMonth, gDay))
 
@@ -321,7 +325,9 @@ fun HomeScreen(
     val hMonth = fullMonthName[formattedHDate.substring(3, formattedHDate.length - 5)]
     val hYear = convertToArabicDigits(formattedHDate.substring(formattedHDate.length - 4))
 
-    dateString = if (time.hours >= 19 || time.hours <= 5) {
+    dateString = if (
+        time in 24 downTo 19
+    ) {
         // meaning it is night
         hDay = convertToArabicDigits(formattedHDate.substring(0, 2).toInt().plus(1).toString())
         "$hDay رات  $hMonth  $hYear"
@@ -329,6 +335,12 @@ fun HomeScreen(
         hDay = convertToArabicDigits(formattedHDate.substring(0, 2))
         "$hDay  $hMonth  $hYear"
     }
+
+    val instagramProfile = "https://www.instagram.com/abdulllqadirrr/"
+
+    val openBrowserLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { _ -> /* Handle result if needed */ }
 
     TasbeehTheme {
 
@@ -515,9 +527,10 @@ fun HomeScreen(
                                 Spacer(Modifier.height(12.dp))
                                 LazyColumn(
                                     modifier = Modifier
-                                        .fillMaxWidth(),
+                                        .fillMaxWidth().wrapContentSize(Alignment.Center).height(575.dp),
                                     verticalArrangement = Arrangement.Top,
-                                    horizontalAlignment = Alignment.CenterHorizontally
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    userScrollEnabled = true,
                                 ) {
                                     items(1) {
                                         tasbeehData.tasbeehTypes.forEach { item ->
@@ -572,7 +585,10 @@ fun HomeScreen(
                                                 badge = {
                                                     if (tasbeehData.singleTasbeeh.contains(item)) {
                                                         val count =
-                                                            sharedPref?.getInt(item.toString(), 0)
+                                                            sharedPref?.getInt(
+                                                                item.toString(),
+                                                                0
+                                                            )
                                                         if (count != null) {
                                                             if (count > 0) {
                                                                 Text(
@@ -598,7 +614,7 @@ fun HomeScreen(
                                 }
                                 Spacer(Modifier.height(12.dp))
                                 Box(
-                                    modifier = Modifier.fillMaxSize()
+                                    modifier = Modifier.fillMaxWidth()
                                 ) {
                                     Column(
                                         modifier = Modifier
@@ -645,6 +661,16 @@ fun HomeScreen(
                                             color = colorScheme.secondary,
                                             modifier = Modifier
                                                 .padding(bottom = 10.dp)
+                                                .clickable {
+                                                    openBrowserLauncher.launch(
+                                                        Intent(
+                                                            Intent.ACTION_VIEW,
+                                                            Uri.parse(
+                                                                instagramProfile
+                                                            )
+                                                        )
+                                                    )
+                                                }
                                         )
                                         Text(
                                             text = "v${
@@ -811,6 +837,7 @@ fun HomeScreen(
                                     text = news,
                                     style = MaterialTheme.typography.bodyMedium,
                                     modifier = Modifier.align(Alignment.CenterHorizontally),
+                                    color = colorScheme.secondary,
                                 )
 
                                 Spacer(modifier = Modifier.height(20.dp))

@@ -48,6 +48,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.window.Dialog
 import com.lamaq.tasbeeh.ui.theme.DarkColorScheme
 import com.lamaq.tasbeeh.ui.theme.LightColorScheme
@@ -63,12 +64,12 @@ fun TasbeehCards(
     var multiTasbeeh by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-    var colorScheme = if (isSystemInDarkTheme()) {
+    val colorScheme = if (isSystemInDarkTheme()) {
         DarkColorScheme
     } else {
         LightColorScheme
     }
-    
+
     if (tasbeehData.hasSub.containsKey(fieldName)) {
         multiTasbeeh = true
     }
@@ -129,16 +130,17 @@ fun TasbeehCards(
                         )
                     ) colorScheme.tertiary else colorScheme.secondary,
                     fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+                    lineHeight = 1.em,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Box(
                     modifier = Modifier.combinedClickable(
                         onClick = {
-                                  Toast.makeText(
-                                      context,
-                                      "Long Click to Edit Total Count",
-                                      Toast.LENGTH_SHORT
-                                  ).show()
+                            Toast.makeText(
+                                context,
+                                "Long Click to Edit Total Count",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         },
                         onLongClick = {
                             showEditDialog = true
@@ -186,7 +188,8 @@ fun TasbeehCards(
                     modifier = Modifier
                         .padding(top = 16.dp, bottom = 8.dp),
                     textAlign = TextAlign.Start,
-                    color = colorScheme.secondary
+                    color = colorScheme.secondary,
+                    lineHeight = 1.em,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Box(
