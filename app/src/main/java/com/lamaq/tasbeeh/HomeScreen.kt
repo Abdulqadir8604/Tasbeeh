@@ -558,7 +558,7 @@ fun HomeScreen(
                                                 label = {
                                                     Text(
                                                         text = item.toString(),
-                                                        style = MaterialTheme.typography.bodyLarge,
+                                                        style = MaterialTheme.typography.bodyMedium,
                                                         color = colorScheme.secondary
                                                     )
                                                 },
