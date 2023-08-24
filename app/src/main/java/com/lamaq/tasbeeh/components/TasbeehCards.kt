@@ -129,7 +129,7 @@ fun TasbeehCards(
                             )
                         )
                     ) colorScheme.tertiary else colorScheme.secondary,
-                    fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+                    fontSize = MaterialTheme.typography.headlineSmall.fontSize,
                     lineHeight = 1.em,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -184,7 +184,7 @@ fun TasbeehCards(
             } else {
                 Text(
                     text = tasbeehName,
-                    style = MaterialTheme.typography.headlineLarge,
+                    style = MaterialTheme.typography.headlineMedium,
                     modifier = Modifier
                         .padding(top = 16.dp, bottom = 8.dp),
                     textAlign = TextAlign.Center,
