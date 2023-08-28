@@ -15,6 +15,7 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -36,6 +37,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
@@ -54,6 +56,7 @@ import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -114,6 +117,7 @@ import com.lamaq.tasbeeh.ui.theme.TasbeehRippleTheme
 import com.lamaq.tasbeeh.ui.theme.TasbeehTheme
 import com.lamaq.tasbeeh.util.convertToArabicDigits
 import com.lamaq.tasbeeh.util.fullMonthName
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.chrono.HijrahDate
@@ -121,7 +125,9 @@ import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import kotlin.system.exitProcess
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
+    ExperimentalFoundationApi::class
+)
 @SuppressLint("UnnecessaryComposedModifier", "UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(
@@ -130,6 +136,8 @@ fun HomeScreen(
     tasbeehData: TasbeehData
 ) {
     val context = LocalContext.current
+
+    val listState = rememberLazyListState()
 
     var visible by remember { mutableStateOf(false) }
 
@@ -471,67 +479,82 @@ fun HomeScreen(
                                     .fillMaxHeight()
                                     .padding(start = 0.dp, end = 40.dp),
                             ) {
-                                Box(
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    IconButton(
-                                        modifier = Modifier
-                                            .padding(top = 10.dp, start = 20.dp)
-                                            .align(Alignment.TopStart),
-                                        onClick = {
-                                            resetAllCounts = true
-                                        }) {
-                                        Icon(
-                                            imageVector = Icons.Outlined.Refresh,
-                                            contentDescription = "Reset all counts",
-                                            tint = colorScheme.secondary
-                                        )
-                                    }
-                                    Text(
-                                        text = "تسابيح",
-                                        style = MaterialTheme.typography.headlineMedium,
-                                        color = colorScheme.tertiary,
-                                        modifier = Modifier
-                                            .padding(top = 10.dp)
-                                            .align(Alignment.TopCenter)
-                                    )
-                                    IconButton(
-                                        modifier = Modifier
-                                            .padding(top = 10.dp, end = 40.dp)
-                                            .align(Alignment.TopEnd),
-                                        onClick = {
-                                            scope.launch {
-                                                drawerState.close()
-                                            }
-                                        }) {
-                                        Icon(
-                                            imageVector = Icons.Outlined.Close,
-                                            contentDescription = "Close Menu",
-                                            tint = colorScheme.secondary
-                                        )
-                                    }
-                                }
-                                Spacer(Modifier.height(12.dp))
-                                Text(
-                                    text = dateString,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = colorScheme.primary,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(top = 20.dp)
-                                        .background(
-                                            colorScheme.secondary,
-                                        ),
-                                    textAlign = TextAlign.Center
-                                )
-                                Spacer(Modifier.height(12.dp))
                                 LazyColumn(
                                     modifier = Modifier
-                                        .fillMaxWidth().wrapContentSize(Alignment.Center).height(575.dp),
+                                        .height(690.dp)
+                                        .fillMaxWidth(),
                                     verticalArrangement = Arrangement.Top,
                                     horizontalAlignment = Alignment.CenterHorizontally,
-                                    userScrollEnabled = true,
+                                    state = listState
                                 ) {
+                                    stickyHeader {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .background(colorScheme.background)
+                                        ) {
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                            ) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                ) {
+                                                    IconButton(
+                                                        modifier = Modifier
+                                                            .padding(top = 10.dp, start = 20.dp)
+                                                            .align(Alignment.TopStart),
+                                                        onClick = {
+                                                            resetAllCounts = true
+                                                        }) {
+                                                        Icon(
+                                                            imageVector = Icons.Outlined.Refresh,
+                                                            contentDescription = "Reset all counts",
+                                                            tint = colorScheme.secondary
+                                                        )
+                                                    }
+                                                    Text(
+                                                        text = "تسابيح",
+                                                        style = MaterialTheme.typography.headlineMedium,
+                                                        color = colorScheme.tertiary,
+                                                        modifier = Modifier
+                                                            .padding(top = 10.dp)
+                                                            .align(Alignment.TopCenter)
+                                                    )
+                                                    IconButton(
+                                                        modifier = Modifier
+                                                            .padding(top = 10.dp, end = 40.dp)
+                                                            .align(Alignment.TopEnd),
+                                                        onClick = {
+                                                            scope.launch {
+                                                                drawerState.close()
+                                                            }
+                                                        }) {
+                                                        Icon(
+                                                            imageVector = Icons.Outlined.Close,
+                                                            contentDescription = "Close Menu",
+                                                            tint = colorScheme.secondary
+                                                        )
+                                                    }
+                                                }
+                                                Spacer(Modifier.height(6.dp))
+                                                Text(
+                                                    text = dateString,
+                                                    style = MaterialTheme.typography.bodyLarge,
+                                                    color = colorScheme.primary,
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(top = 20.dp)
+                                                        .background(
+                                                            colorScheme.secondary,
+                                                        ),
+                                                    textAlign = TextAlign.Center
+                                                )
+                                                Spacer(Modifier.height(12.dp))
+                                            }
+                                        }
+                                    }
                                     items(1) {
                                         tasbeehData.tasbeehTypes.forEach { item ->
                                             NavigationDrawerItem(
@@ -543,7 +566,7 @@ fun HomeScreen(
                                                         top = 5.dp,
                                                         bottom = 5.dp
                                                     )
-                                                    .fillMaxWidth(),
+                                                    .fillMaxSize(),
                                                 icon = {
                                                     Icon(
                                                         imageVector = if (tasbeehName == item) {
@@ -558,7 +581,10 @@ fun HomeScreen(
                                                 label = {
                                                     Text(
                                                         text = item.toString(),
-                                                        style = MaterialTheme.typography.bodyMedium,
+                                                        style = if(item.toString().length >= 20)
+                                                            MaterialTheme.typography.bodyLarge
+                                                        else
+                                                            MaterialTheme.typography.titleLarge,
                                                         color = colorScheme.secondary
                                                     )
                                                 },
@@ -609,6 +635,7 @@ fun HomeScreen(
                                                     bottomEnd = 30.dp
                                                 ),
                                             )
+                                            Divider(color = colorScheme.primaryContainer)
                                         }
                                     }
                                 }
@@ -954,6 +981,11 @@ fun HomeScreen(
                             }
                             LaunchedEffect(true) {
                                 visible = true
+                                delay(500)
+                                listState.animateScrollToItem(
+                                    tasbeehData.tasbeehTypes.indexOf(selectedItem.value) + 1,
+                                    0
+                                )
                             }
                         }
                     }

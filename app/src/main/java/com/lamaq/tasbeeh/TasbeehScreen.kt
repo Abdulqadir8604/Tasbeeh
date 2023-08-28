@@ -9,6 +9,7 @@ import android.media.SoundPool
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -128,6 +129,8 @@ fun TasbeehScreen(
     hasHaptics = settingsPref.getBoolean("hasHaptics", true)
     var hasSound by remember { mutableStateOf(true) }
     hasSound = settingsPref.getBoolean("hasSound", true)
+    var hasTB by remember { mutableStateOf(false) }
+
 
     var showEditDialog by remember { mutableStateOf(false) }
     var showLimitDialog by remember { mutableStateOf(false) }
@@ -142,6 +145,8 @@ fun TasbeehScreen(
 
     lateinit var soundPool: SoundPool
 
+    lateinit var ttsPool: SoundPool
+
     val audioAttributes = AudioAttributes.Builder()
         .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
         .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -152,13 +157,22 @@ fun TasbeehScreen(
         .setAudioAttributes(audioAttributes)
         .build()
 
+    ttsPool = SoundPool.Builder()
+        .setMaxStreams(1)
+        .setAudioAttributes(audioAttributes)
+        .build()
+
     // Load the sound effect from the raw resource
     val soundId: Int = soundPool.load(context, R.raw.click, 1)
+
+    val ttsId: Int = ttsPool.load(context, R.raw.salawat, 1)
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
     val colorScheme = if (isSystemInDarkTheme()) DarkColorScheme else LightColorScheme
+
+    var buttonEnabled by remember { mutableStateOf(true) }
 
     TasbeehTheme {
         Surface(
@@ -302,6 +316,44 @@ fun TasbeehScreen(
                                     hasHaptics = !hasHaptics
                                 },
                             )
+                            DropdownMenuItem(
+                                text = {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "Talk Back",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            modifier = Modifier.padding(end = 10.dp),
+                                            color = colorScheme.secondary,
+                                        )
+                                        Switch(
+                                            checked = hasTB,
+                                            onCheckedChange = {
+                                                hasTB = it
+                                                with(settingsPref.edit()) {
+                                                    putBoolean("hasTB", hasTB)
+                                                    apply()
+                                                }
+                                            },
+                                            modifier = Modifier
+                                                .padding(start = 10.dp)
+                                                .height(20.dp),
+                                            colors = SwitchDefaults.colors(
+                                                checkedThumbColor = colorScheme.primary,
+                                                uncheckedThumbColor = colorScheme.secondary,
+                                                uncheckedTrackColor = colorScheme.primary,
+                                                checkedTrackColor = colorScheme.secondary
+                                            ),
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    hasTB = !hasTB
+                                },
+                            )
                         }
                     }
                     // drop down menu end
@@ -427,28 +479,49 @@ fun TasbeehScreen(
                                                             .show()
                                                     },
                                                     onLongClick = {
-                                                        tts = TextToSpeech(context) { status ->
-                                                            if (status == TextToSpeech.SUCCESS) {
-                                                                val result = tts?.setLanguage(
-                                                                    Locale.forLanguageTag("ar")
-                                                                )
-                                                                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                                                                    tts = null
-                                                                } else {
-                                                                    tts?.speak(
-                                                                        if (tasbeehName in tasbeehData.longTasbeehs)
-                                                                            tasbeehData.longTasbeehs.filter { it.key == tasbeehName }.values
-                                                                                .first()
-                                                                                .toString()
-                                                                        else
-                                                                            tasbeehName,
-                                                                        TextToSpeech.QUEUE_FLUSH,
-                                                                        null,
-                                                                        null
-                                                                    )
-                                                                }
-                                                            }
-                                                        }
+//                                                        tts = TextToSpeech(context) { status ->
+//                                                            if (status == TextToSpeech.SUCCESS) {
+//                                                                val result = tts?.setLanguage(
+//                                                                    Locale.forLanguageTag("ar")
+//                                                                )
+//                                                                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+//                                                                    tts = null
+//                                                                } else {
+//                                                                    tts?.speak(
+//                                                                        if (tasbeehName in tasbeehData.longTasbeehs)
+//                                                                            tasbeehData.longTasbeehs.filter { it.key == tasbeehName }.values
+//                                                                                .first()
+//                                                                                .toString()
+//                                                                        else
+//                                                                            tasbeehName,
+//                                                                        TextToSpeech.QUEUE_FLUSH,
+//                                                                        null,
+//                                                                        TextToSpeech.ACTION_TTS_QUEUE_PROCESSING_COMPLETED
+//                                                                    )
+//                                                                }
+//                                                            }
+//                                                        }
+//                                                        tts?.setOnUtteranceProgressListener(
+//                                                            object : UtteranceProgressListener() {
+//                                                                override fun onDone(utteranceId: String?) {
+//                                                                    buttonEnabled = true
+//                                                                }
+//
+//                                                                @Deprecated("Deprecated in Java")
+//                                                                override fun onError(
+//                                                                    utteranceId: String?
+//                                                                ) {
+//                                                                    buttonEnabled = true
+//                                                                }
+//
+//                                                                override fun onStart(
+//                                                                    utteranceId: String?
+//                                                                ) {
+//                                                                    buttonEnabled = false
+//                                                                }
+//                                                            }
+//                                                        )
+                                                                  ttsPool.play(ttsId, 1.0f, 1.0f, 1, 0, 1.0f)
                                                     },
                                                 ),
                                             color = colorScheme.secondary,
@@ -462,9 +535,8 @@ fun TasbeehScreen(
                                             MaterialTheme.typography.headlineSmall
                                         else
                                             MaterialTheme.typography.headlineLarge,
-                                        modifier = if (tasbeehData.longTasbeehs.contains(tasbeehName))
-                                            Modifier
-                                                .padding(top = 40.dp)
+                                        modifier = Modifier
+                                                .padding(top = if (tasbeehData.longTasbeehs.contains(tasbeehName)) 40.dp else 30.dp)
                                                 .combinedClickable(
                                                     onClick = {
                                                         Toast
@@ -493,44 +565,31 @@ fun TasbeehScreen(
                                                                             tasbeehName,
                                                                         TextToSpeech.QUEUE_FLUSH,
                                                                         null,
-                                                                        null
+                                                                        TextToSpeech.ACTION_TTS_QUEUE_PROCESSING_COMPLETED
                                                                     )
                                                                 }
                                                             }
                                                         }
-                                                    },
-                                                )
-                                        else
-                                            Modifier
-                                                .padding(top = 30.dp)
-                                                .combinedClickable(
-                                                    onClick = {
-                                                        Toast
-                                                            .makeText(
-                                                                context,
-                                                                "Long press to hear the tasbeeh",
-                                                                Toast.LENGTH_SHORT
-                                                            )
-                                                            .show()
-                                                    },
-                                                    onLongClick = {
-                                                        tts = TextToSpeech(context) { status ->
-                                                            if (status == TextToSpeech.SUCCESS) {
-                                                                val result = tts?.setLanguage(
-                                                                    Locale.forLanguageTag("ar")
-                                                                )
-                                                                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                                                                    tts = null
-                                                                } else {
-                                                                    tts?.speak(
-                                                                        tasbeehName,
-                                                                        TextToSpeech.QUEUE_FLUSH,
-                                                                        null,
-                                                                        null
-                                                                    )
+                                                        tts?.setOnUtteranceProgressListener(
+                                                            object : UtteranceProgressListener() {
+                                                                override fun onDone(utteranceId: String?) {
+                                                                    buttonEnabled = true
+                                                                }
+
+                                                                @Deprecated("Deprecated in Java")
+                                                                override fun onError(
+                                                                    utteranceId: String?
+                                                                ) {
+                                                                    buttonEnabled = true
+                                                                }
+
+                                                                override fun onStart(
+                                                                    utteranceId: String?
+                                                                ) {
+                                                                    buttonEnabled = false
                                                                 }
                                                             }
-                                                        }
+                                                        )
                                                     },
                                                 ),
                                         color = colorScheme.secondary,
@@ -621,13 +680,55 @@ fun TasbeehScreen(
                                         shape = MaterialTheme.shapes.extraLarge
                                     )
                                     .clickable(
+                                        enabled = buttonEnabled,
                                         onClick = {
                                             if (hasSound && !limitReached) {
                                                 soundPool.play(soundId, 1.0f, 1.0f, 1, 0, 1.0f)
                                             }
                                             try {
+                                                if (hasTB) {
+                                                    tts = TextToSpeech(context) { status ->
+                                                        if (status == TextToSpeech.SUCCESS) {
+                                                            val result = tts?.setLanguage(
+                                                                Locale.forLanguageTag("ar")
+                                                            )
+                                                            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                                                                tts = null
+                                                            } else {
+                                                                tts?.speak(
+                                                                    if (tasbeehName in tasbeehData.longTasbeehs)
+                                                                        tasbeehData.longTasbeehs.filter { it.key == tasbeehName }.values
+                                                                            .first()
+                                                                            .toString()
+                                                                    else
+                                                                        tasbeehName,
+                                                                    TextToSpeech.QUEUE_FLUSH,
+                                                                    null,
+                                                                    TextToSpeech.ACTION_TTS_QUEUE_PROCESSING_COMPLETED
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                    tts?.setOnUtteranceProgressListener(
+                                                        object : UtteranceProgressListener() {
+                                                            override fun onDone(utteranceId: String?) {
+                                                                buttonEnabled = true
+                                                            }
+
+                                                            @Deprecated("Deprecated in Java")
+                                                            override fun onError(utteranceId: String?) {
+                                                                buttonEnabled = true
+                                                            }
+
+                                                            override fun onStart(utteranceId: String?) {
+                                                                buttonEnabled = false
+                                                            }
+                                                        }
+                                                    )
+                                                }
+
                                                 if (limit > 0) {
-                                                    if (counter < limit && !limitReached) {
+                                                    if (counter < limit && !limitReached && counter < defaultLimit && buttonEnabled) {
                                                         counter++
                                                         with(sharedPref.edit()) {
                                                             putInt(
@@ -1024,6 +1125,7 @@ fun TasbeehScreen(
         }
     }
     BackHandler {
+        tts?.stop()
         visible = false
         navController.popBackStack()
     }

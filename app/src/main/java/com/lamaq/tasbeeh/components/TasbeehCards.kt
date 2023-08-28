@@ -62,6 +62,7 @@ fun TasbeehCards(
     onItemClick: (String, Any?) -> Unit,
 ) {
     var multiTasbeeh by remember { mutableStateOf(false) }
+    var longName by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     val colorScheme = if (isSystemInDarkTheme()) {
@@ -72,6 +73,10 @@ fun TasbeehCards(
 
     if (tasbeehData.hasSub.containsKey(fieldName)) {
         multiTasbeeh = true
+    }
+
+    if (tasbeehName.length > 20) {
+        longName = true
     }
 
     val sharedPref = context.getSharedPreferences(
@@ -181,6 +186,66 @@ fun TasbeehCards(
                         modifier = Modifier.size(24.dp)
                     )
                 }
+            } else if (longName) {
+                Text(
+                    text = tasbeehName,
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier
+                        .padding(top = 16.dp, bottom = 8.dp),
+                    textAlign = TextAlign.Center,
+                    color = colorScheme.secondary,
+                    lineHeight = 1.em,
+                    fontWeight = FontWeight.Light,
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier.combinedClickable(
+                        onClick = {
+                            Toast.makeText(
+                                context,
+                                "Long Click to Edit Total Count",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        },
+                        onLongClick = {
+                            showEditDialog = true
+                        }
+                    )
+                ) {
+                    Text(
+                        text = totalCount,
+                        style = MaterialTheme.typography.headlineMedium,
+                        modifier = Modifier
+                            .padding(16.dp),
+                        textAlign = TextAlign.End,
+                        color = colorScheme.secondary,
+                        fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+                    )
+                }
+                Spacer(modifier = Modifier.height(26.dp))
+                ElevatedButton(
+                    onClick = {
+                        onItemClick(
+                            "tasbeeh/$tasbeehName/${sharedPref.getInt(tasbeehName, 0)}",
+                            null
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = ButtonDefaults.elevatedButtonColors(
+                        containerColor = colorScheme.tertiary,
+                        contentColor = colorScheme.onTertiary
+                    ),
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.ArrowForward,
+                        contentDescription = "Go",
+                        tint = colorScheme.onTertiary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(30.dp))
             } else {
                 Text(
                     text = tasbeehName,
@@ -345,4 +410,3 @@ fun TasbeehCards(
         }
     }
 }
-
