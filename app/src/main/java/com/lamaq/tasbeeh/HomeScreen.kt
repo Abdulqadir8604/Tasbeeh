@@ -79,6 +79,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -117,7 +118,6 @@ import com.lamaq.tasbeeh.ui.theme.TasbeehRippleTheme
 import com.lamaq.tasbeeh.ui.theme.TasbeehTheme
 import com.lamaq.tasbeeh.util.convertToArabicDigits
 import com.lamaq.tasbeeh.util.fullMonthName
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.chrono.HijrahDate
@@ -981,11 +981,11 @@ fun HomeScreen(
                             }
                             LaunchedEffect(true) {
                                 visible = true
-                                delay(500)
-                                listState.animateScrollToItem(
-                                    tasbeehData.tasbeehTypes.indexOf(selectedItem.value) + 1,
-                                    0
-                                )
+                            }
+                            DisposableEffect(true) {
+                                onDispose {
+                                    visible = false
+                                }
                             }
                         }
                     }

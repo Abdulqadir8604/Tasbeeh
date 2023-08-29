@@ -479,49 +479,48 @@ fun TasbeehScreen(
                                                             .show()
                                                     },
                                                     onLongClick = {
-//                                                        tts = TextToSpeech(context) { status ->
-//                                                            if (status == TextToSpeech.SUCCESS) {
-//                                                                val result = tts?.setLanguage(
-//                                                                    Locale.forLanguageTag("ar")
-//                                                                )
-//                                                                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-//                                                                    tts = null
-//                                                                } else {
-//                                                                    tts?.speak(
-//                                                                        if (tasbeehName in tasbeehData.longTasbeehs)
-//                                                                            tasbeehData.longTasbeehs.filter { it.key == tasbeehName }.values
-//                                                                                .first()
-//                                                                                .toString()
-//                                                                        else
-//                                                                            tasbeehName,
-//                                                                        TextToSpeech.QUEUE_FLUSH,
-//                                                                        null,
-//                                                                        TextToSpeech.ACTION_TTS_QUEUE_PROCESSING_COMPLETED
-//                                                                    )
-//                                                                }
-//                                                            }
-//                                                        }
-//                                                        tts?.setOnUtteranceProgressListener(
-//                                                            object : UtteranceProgressListener() {
-//                                                                override fun onDone(utteranceId: String?) {
-//                                                                    buttonEnabled = true
-//                                                                }
-//
-//                                                                @Deprecated("Deprecated in Java")
-//                                                                override fun onError(
-//                                                                    utteranceId: String?
-//                                                                ) {
-//                                                                    buttonEnabled = true
-//                                                                }
-//
-//                                                                override fun onStart(
-//                                                                    utteranceId: String?
-//                                                                ) {
-//                                                                    buttonEnabled = false
-//                                                                }
-//                                                            }
-//                                                        )
-                                                                  ttsPool.play(ttsId, 1.0f, 1.0f, 1, 0, 1.0f)
+                                                        tts = TextToSpeech(context) { status ->
+                                                            if (status == TextToSpeech.SUCCESS) {
+                                                                val result = tts?.setLanguage(
+                                                                    Locale.forLanguageTag("ar")
+                                                                )
+                                                                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                                                                    tts = null
+                                                                } else {
+                                                                    tts?.speak(
+                                                                        if (tasbeehName in tasbeehData.longTasbeehs)
+                                                                            tasbeehData.longTasbeehs.filter { it.key == tasbeehName }.values
+                                                                                .first()
+                                                                                .toString()
+                                                                        else
+                                                                            tasbeehName,
+                                                                        TextToSpeech.QUEUE_FLUSH,
+                                                                        null,
+                                                                        TextToSpeech.ACTION_TTS_QUEUE_PROCESSING_COMPLETED
+                                                                    )
+                                                                }
+                                                            }
+                                                        }
+                                                        tts?.setOnUtteranceProgressListener(
+                                                            object : UtteranceProgressListener() {
+                                                                override fun onDone(utteranceId: String?) {
+                                                                    buttonEnabled = true
+                                                                }
+
+                                                                @Deprecated("Deprecated in Java")
+                                                                override fun onError(
+                                                                    utteranceId: String?
+                                                                ) {
+                                                                    buttonEnabled = true
+                                                                }
+
+                                                                override fun onStart(
+                                                                    utteranceId: String?
+                                                                ) {
+                                                                    buttonEnabled = false
+                                                                }
+                                                            }
+                                                        )
                                                     },
                                                 ),
                                             color = colorScheme.secondary,
