@@ -585,7 +585,7 @@ fun HomeScreen(
                                                             MaterialTheme.typography.bodyLarge
                                                         else
                                                             MaterialTheme.typography.titleLarge,
-                                                        color = colorScheme.secondary
+                                                        color = colorScheme.secondary,
                                                     )
                                                 },
                                                 onClick = {
@@ -608,25 +608,25 @@ fun HomeScreen(
                                                     unselectedIconColor = colorScheme.secondary,
                                                 ),
 
-                                                badge = {
-                                                    if (tasbeehData.singleTasbeeh.contains(item)) {
-                                                        val count =
-                                                            sharedPref?.getInt(
-                                                                item.toString(),
-                                                                0
-                                                            )
-                                                        if (count != null) {
-                                                            if (count > 0) {
-                                                                Text(
-                                                                    text = count.toString(),
-                                                                    style = MaterialTheme.typography.bodyMedium,
-                                                                    color = colorScheme.secondary
-                                                                )
-                                                            }
-                                                        }
-                                                    }
-                                                    //if want to add an icon to the multi tasbeeh then add an else statement here
-                                                },
+//                                                badge = {
+//                                                    if (tasbeehData.singleTasbeeh.contains(item)) {
+//                                                        val count =
+//                                                            sharedPref?.getInt(
+//                                                                item.toString(),
+//                                                                0
+//                                                            )
+//                                                        if (count != null) {
+//                                                            if (count > 0) {
+//                                                                Text(
+//                                                                    text = count.toString(),
+//                                                                    style = MaterialTheme.typography.bodyMedium,
+//                                                                    color = colorScheme.secondary
+//                                                                )
+//                                                            }
+//                                                        }
+//                                                    }
+//                                                    //if want to add an icon to the multi tasbeeh then add an else statement here
+//                                                },
 
                                                 shape = RoundedCornerShape(
                                                     topStart = 0.dp,
@@ -706,7 +706,7 @@ fun HomeScreen(
                                                     0
                                                 ).versionName
                                             }",
-                                            style = MaterialTheme.typography.bodyMedium,
+                                            style = MaterialTheme.typography.bodySmall,
                                             color = colorScheme.secondary,
                                             modifier = Modifier
                                                 .padding(bottom = 20.dp)

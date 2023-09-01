@@ -135,7 +135,7 @@ fun TasbeehCards(
                         )
                     ) colorScheme.tertiary else colorScheme.secondary,
                     fontSize = MaterialTheme.typography.headlineSmall.fontSize,
-                    lineHeight = 1.em,
+                    lineHeight = 1.75.em,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Box(
@@ -194,7 +194,7 @@ fun TasbeehCards(
                         .padding(top = 16.dp, bottom = 8.dp),
                     textAlign = TextAlign.Center,
                     color = colorScheme.secondary,
-                    lineHeight = 1.em,
+                    lineHeight = 1.5.em,
                     fontWeight = FontWeight.Light,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -254,7 +254,7 @@ fun TasbeehCards(
                         .padding(top = 16.dp, bottom = 8.dp),
                     textAlign = TextAlign.Center,
                     color = colorScheme.secondary,
-                    lineHeight = 1.em,
+                    lineHeight = 1.5.em,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Box(

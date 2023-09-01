@@ -12,8 +12,8 @@ android {
         applicationId = "com.lamaq.tasbeeh"
         minSdk = 28
         targetSdk = 34
-        versionCode = 14
-        versionName = "4.8.0"
+        versionCode = 15
+        versionName = "5.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
