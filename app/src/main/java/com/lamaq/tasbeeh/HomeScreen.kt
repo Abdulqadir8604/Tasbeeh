@@ -118,6 +118,7 @@ import com.lamaq.tasbeeh.ui.theme.TasbeehRippleTheme
 import com.lamaq.tasbeeh.ui.theme.TasbeehTheme
 import com.lamaq.tasbeeh.util.convertToArabicDigits
 import com.lamaq.tasbeeh.util.fullMonthName
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.chrono.HijrahDate
@@ -125,8 +126,9 @@ import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import kotlin.system.exitProcess
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
-    ExperimentalFoundationApi::class
+@OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
+    ExperimentalFoundationApi::class, FlowPreview::class
 )
 @SuppressLint("UnnecessaryComposedModifier", "UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -136,8 +138,6 @@ fun HomeScreen(
     tasbeehData: TasbeehData
 ) {
     val context = LocalContext.current
-
-    val listState = rememberLazyListState()
 
     var visible by remember { mutableStateOf(false) }
 
@@ -485,7 +485,8 @@ fun HomeScreen(
                                         .fillMaxWidth(),
                                     verticalArrangement = Arrangement.Top,
                                     horizontalAlignment = Alignment.CenterHorizontally,
-                                    state = listState
+                                    state = rememberLazyListState(),
+
                                 ) {
                                     stickyHeader {
                                         Box(
@@ -581,7 +582,7 @@ fun HomeScreen(
                                                 label = {
                                                     Text(
                                                         text = item.toString(),
-                                                        style = if(item.toString().length >= 20)
+                                                        style = if (item.toString().length >= 20)
                                                             MaterialTheme.typography.bodyLarge
                                                         else
                                                             MaterialTheme.typography.titleLarge,
@@ -979,6 +980,7 @@ fun HomeScreen(
                                     )
                                 }
                             }
+
                             LaunchedEffect(true) {
                                 visible = true
                             }
