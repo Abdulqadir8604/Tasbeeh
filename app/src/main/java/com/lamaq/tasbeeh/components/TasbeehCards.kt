@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -97,7 +96,6 @@ fun TasbeehCards(
         modifier = Modifier
             .padding(16.dp)
             .widthIn(min = 200.dp, max = 350.dp)
-            .heightIn(min = 200.dp, max = 350.dp)
             .background(
                 color = colorScheme.primary,
                 shape = MaterialTheme.shapes.large
