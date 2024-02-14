@@ -116,14 +116,9 @@ import com.lamaq.tasbeeh.ui.theme.DrawerScrimColor
 import com.lamaq.tasbeeh.ui.theme.LightColorScheme
 import com.lamaq.tasbeeh.ui.theme.TasbeehRippleTheme
 import com.lamaq.tasbeeh.ui.theme.TasbeehTheme
-import com.lamaq.tasbeeh.util.convertToArabicDigits
-import com.lamaq.tasbeeh.util.fullMonthName
+import com.lamaq.tasbeeh.util.getMisriDate
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.chrono.HijrahDate
-import java.time.format.DateTimeFormatter
-import java.util.Calendar
 import kotlin.system.exitProcess
 
 @OptIn(
@@ -206,8 +201,6 @@ fun HomeScreen(
 
     val notificationManager = NotificationManagerCompat.from(LocalContext.current)
     val areNotificationsEnabled = notificationManager.areNotificationsEnabled()
-
-    var dateString by remember { mutableStateOf("") }
 
     if (!askedForNotiPer) {
         if (!areNotificationsEnabled) {
@@ -318,30 +311,6 @@ fun HomeScreen(
                 return super.onPostFling(consumed, available)
             }
         }
-    }
-
-    val gDay = LocalDate.now().dayOfMonth
-    val gMonth = LocalDate.now().monthValue
-    val gYear = LocalDate.now().year
-    val time = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-
-    val hDate: HijrahDate = HijrahDate.from(LocalDate.of(gYear, gMonth, gDay))
-
-    val formattedHDate = hDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"))
-
-    var hDay = ""
-    val hMonth = fullMonthName[formattedHDate.substring(3, formattedHDate.length - 5)]
-    val hYear = convertToArabicDigits(formattedHDate.substring(formattedHDate.length - 4))
-
-    dateString = if (
-        time in 24 downTo 19
-    ) {
-        // meaning it is night
-        hDay = convertToArabicDigits(formattedHDate.substring(0, 2).toInt().plus(1).toString())
-        "$hDay رات  $hMonth  $hYear"
-    } else {
-        hDay = convertToArabicDigits(formattedHDate.substring(0, 2))
-        "$hDay  $hMonth  $hYear"
     }
 
     val instagramProfile = "https://www.instagram.com/abdulllqadirrr/"
@@ -516,12 +485,12 @@ fun HomeScreen(
                                                         )
                                                     }
                                                     Text(
-                                                        text = "تسابيح",
+                                                        text = "تسبيح",
                                                         style = MaterialTheme.typography.headlineMedium,
                                                         color = colorScheme.tertiary,
                                                         modifier = Modifier
                                                             .padding(top = 10.dp)
-                                                            .align(Alignment.TopCenter)
+                                                            .align(Alignment.TopCenter),
                                                     )
                                                     IconButton(
                                                         modifier = Modifier
@@ -541,7 +510,7 @@ fun HomeScreen(
                                                 }
                                                 Spacer(Modifier.height(6.dp))
                                                 Text(
-                                                    text = dateString,
+                                                    text = getMisriDate(),
                                                     style = MaterialTheme.typography.bodyLarge,
                                                     color = colorScheme.primary,
                                                     modifier = Modifier
@@ -979,6 +948,9 @@ fun HomeScreen(
                                         modifier = Modifier.align(Alignment.CenterHorizontally),
                                     )
                                 }
+
+                                // if no internet then show this
+
                             }
 
                             LaunchedEffect(true) {

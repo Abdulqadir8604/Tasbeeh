@@ -12,7 +12,10 @@ import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -20,6 +23,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.with
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -97,7 +101,9 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UnrememberedMutableInteractionSource")
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
+    ExperimentalAnimationApi::class
+)
 @Composable
 fun TasbeehScreen(
     tasbeehName: String,
@@ -164,8 +170,6 @@ fun TasbeehScreen(
 
     // Load the sound effect from the raw resource
     val soundId: Int = soundPool.load(context, R.raw.click, 1)
-
-    val ttsId: Int = ttsPool.load(context, R.raw.salawat, 1)
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -602,21 +606,39 @@ fun TasbeehScreen(
                                     textAlign = TextAlign.Center,
 
                                     )
-                                Text(
-                                    text = counter.toString(),
-                                    modifier = if (tasbeehData.shortNames.contains(tasbeehName)) {
-                                        Modifier
-                                            .padding(top = 30.dp, bottom = 8.dp)
-                                            .fillMaxWidth(1f)
-                                    } else {
-                                        Modifier
-                                            .padding(top = 40.dp, bottom = 8.dp)
-                                            .fillMaxWidth(1f)
-                                    },
-                                    color = colorScheme.secondary,
-                                    style = textSizeStyle,
-                                    maxLines = 1,
-                                )
+                                AnimatedContent(
+                                    modifier = Modifier
+                                        .padding(vertical = 40.dp)
+                                        .fillMaxWidth(),
+                                    targetState = counter,
+                                    transitionSpec = {
+                                        if (targetState > initialState) {
+                                            slideInVertically { height -> height } + fadeIn() with
+                                                    slideOutVertically { height -> -height } + fadeOut()
+                                        } else {
+                                            slideInVertically { height -> -height } + fadeIn() with
+                                                    slideOutVertically { height -> height } + fadeOut()
+                                        }.using(
+                                            SizeTransform(clip = false)
+                                        )
+                                    }, label = ""
+                                ) { targetCount ->
+                                    Text(
+                                        text = targetCount.toString(),
+                                        modifier = if (tasbeehData.shortNames.contains(tasbeehName)) {
+                                            Modifier
+                                                .padding(top = 30.dp, bottom = 8.dp)
+                                                .fillMaxWidth()
+                                        } else {
+                                            Modifier
+                                                .padding(top = 40.dp, bottom = 8.dp)
+                                                .fillMaxWidth()
+                                        },
+                                        color = colorScheme.secondary,
+                                        style = textSizeStyle,
+                                        maxLines = 1,
+                                    )
+                                }
                                 Text(
                                     text = "+",
                                     color = colorScheme.secondary,
